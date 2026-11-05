@@ -1,0 +1,74 @@
+<div class="dialog-dropdown">
+	<button class="opener" command="toggle-popover" commandfor="{{.item.HashTag}}-dropdown" aria-label="{{ctx.Locale.Tr "repo.issues.context.menu"}}">
+		{{svg "octicon-kebab-horizontal"}}
+	</button>
+	<dialog popover class="inline-flip" id="{{.item.HashTag}}-dropdown">
+		<ul>
+			<li>
+				{{$referenceUrl := ""}}
+				{{if .issue}}
+					{{$referenceUrl = printf "%s#%s" .ctxData.Issue.Link .item.HashTag}}
+				{{else}}
+					{{$referenceUrl = printf "%s/files#%s" .ctxData.Issue.Link .item.HashTag}}
+				{{end}}
+				<button type="button" data-clipboard-text-type="url" data-clipboard-text="{{$referenceUrl}}">
+					{{ctx.Locale.Tr "repo.issues.context.copy_link"}}
+				</button>
+			</li>
+
+			{{if .item.Content}}
+				<li>
+					<button type="button" class="context js-aria-clickable" data-clipboard-target="#{{.item.HashTag}}-raw">
+						{{ctx.Locale.Tr "repo.issues.context.copy_markdown"}}
+					</button>
+				</li>
+			{{end}}
+
+			{{if and .ctxData.IsSigned (not .ctxData.Repository.IsArchived)}}
+				<li>
+					<button type="button" class="quote-reply{{if .diff}} quote-reply-diff{{end}}" data-target="{{.item.HashTag}}-content" data-author="{{.item.Poster.Name}}" data-reference-url="{{$referenceUrl}}" data-context="{{.ctxData.Repository.Link}}">
+						{{ctx.Locale.Tr "repo.issues.context.quote_reply"}}
+					</button>
+				</li>
+
+				{{if not .ctxData.UnitIssuesGlobalDisabled}}
+					<li>
+						<button type="button" class="reference-issue" data-target="{{.item.HashTag}}-raw" data-modal="#reference-issue-modal" data-poster="{{.item.Poster.GetDisplayName}}" data-poster-username="{{.item.Poster.Name}}" data-reference="{{$referenceUrl}}">
+							{{ctx.Locale.Tr "repo.issues.context.reference_issue"}}
+						</button>
+					</li>
+				{{end}}
+
+				{{if or .ctxData.Permission.IsAdmin .IsCommentPoster .ctxData.HasIssuesOrPullsWritePermission}}
+					<hr>
+					<li>
+						<button type="button" class="edit-content">
+							{{ctx.Locale.Tr "repo.issues.context.edit"}}
+						</button>
+					</li>
+
+					{{if .delete}}
+						<li>
+							<button type="button" class="delete-comment" data-comment-id={{.item.HashTag}} data-url="{{.ctxData.RepoLink}}/comments/{{.item.ID}}/delete" data-locale="{{ctx.Locale.Tr "repo.issues.delete_comment_confirm"}}">
+								{{ctx.Locale.Tr "repo.issues.context.delete"}}
+							</button>
+						</li>
+					{{end}}
+				{{end}}
+			{{end}}
+
+			{{if and .ctxData.IsModerationEnabled .ctxData.IsSigned (not .IsCommentPoster)}}
+				{{$contentType := "comment"}}
+				{{if eq .item .ctxData.Issue}}
+					{{if .ctxData.Issue.IsPull}} {{$contentType = "pull"}} {{else}} {{$contentType = "issue"}} {{end}}
+				{{end}}
+				<hr>
+				<li>
+					<a href="{{AppSubUrl}}/report_abuse?type={{$contentType}}&id={{.item.ID}}">
+						{{ctx.Locale.Tr "moderation.report_content"}}
+					</a>
+				</li>
+			{{end}}
+		</ul>
+	</dialog>
+</div>

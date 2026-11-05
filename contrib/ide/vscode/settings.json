@@ -1,0 +1,11 @@
+{
+  "go.buildTags": "sqlite,sqlite_unlock_notify",
+  "go.testFlags": ["-v"],
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": ["--fast"],
+  "go.testEnvVars": {
+    "PROJECT_ROOT": "${workspaceRoot}",
+    "PROJECT_CONF": "tests/sqlite.ini",
+  },
+  "chat.disableAIFeatures": true,
+}

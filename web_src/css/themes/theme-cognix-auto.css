@@ -1,0 +1,2 @@
+@import "./theme-cognix-light.css" (prefers-color-scheme: light);
+@import "./theme-cognix-dark.css" (prefers-color-scheme: dark);

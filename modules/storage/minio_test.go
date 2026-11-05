@@ -1,0 +1,369 @@
+// Copyright 2023 The Gitea Authors. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package storage
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"net"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"os"
+	"sync/atomic"
+	"testing"
+	"time"
+
+	"forgejo.org/modules/setting"
+	"forgejo.org/modules/test"
+
+	"github.com/minio/minio-go/v7"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestMinioStorageIterator(t *testing.T) {
+	endpoint := os.Getenv("TEST_MINIO_ENDPOINT")
+	if endpoint == "" {
+		t.Skip("TEST_MINIO_ENDPOINT not set")
+		return
+	}
+	testStorageIterator(t, setting.MinioStorageType, &setting.Storage{
+		MinioConfig: setting.MinioStorageConfig{
+			Endpoint:        endpoint,
+			AccessKeyID:     "123456",
+			SecretAccessKey: "12345678",
+			Bucket:          "gitea",
+			Location:        "us-east-1",
+		},
+	})
+}
+
+func TestVirtualHostMinioStorage(t *testing.T) {
+	endpoint := os.Getenv("TEST_MINIO_ENDPOINT")
+	if endpoint == "" {
+		t.Skip("TEST_MINIO_ENDPOINT not set")
+		return
+	}
+	testStorageIterator(t, setting.MinioStorageType, &setting.Storage{
+		MinioConfig: setting.MinioStorageConfig{
+			Endpoint:        endpoint,
+			AccessKeyID:     "123456",
+			SecretAccessKey: "12345678",
+			Bucket:          "gitea",
+			Location:        "us-east-1",
+			BucketLookup:    "dns",
+		},
+	})
+}
+
+func TestMinioStoragePath(t *testing.T) {
+	m := &MinioStorage{basePath: ""}
+	assert.Empty(t, m.buildMinioPath("/"))
+	assert.Empty(t, m.buildMinioPath("."))
+	assert.Equal(t, "a", m.buildMinioPath("/a"))
+	assert.Equal(t, "a/b", m.buildMinioPath("/a/b/"))
+	assert.Empty(t, m.buildMinioDirPrefix(""))
+	assert.Equal(t, "a/", m.buildMinioDirPrefix("/a/"))
+
+	m = &MinioStorage{basePath: "/"}
+	assert.Empty(t, m.buildMinioPath("/"))
+	assert.Empty(t, m.buildMinioPath("."))
+	assert.Equal(t, "a", m.buildMinioPath("/a"))
+	assert.Equal(t, "a/b", m.buildMinioPath("/a/b/"))
+	assert.Empty(t, m.buildMinioDirPrefix(""))
+	assert.Equal(t, "a/", m.buildMinioDirPrefix("/a/"))
+
+	m = &MinioStorage{basePath: "/base"}
+	assert.Equal(t, "base", m.buildMinioPath("/"))
+	assert.Equal(t, "base", m.buildMinioPath("."))
+	assert.Equal(t, "base/a", m.buildMinioPath("/a"))
+	assert.Equal(t, "base/a/b", m.buildMinioPath("/a/b/"))
+	assert.Equal(t, "base/", m.buildMinioDirPrefix(""))
+	assert.Equal(t, "base/a/", m.buildMinioDirPrefix("/a/"))
+
+	m = &MinioStorage{basePath: "/base/"}
+	assert.Equal(t, "base", m.buildMinioPath("/"))
+	assert.Equal(t, "base", m.buildMinioPath("."))
+	assert.Equal(t, "base/a", m.buildMinioPath("/a"))
+	assert.Equal(t, "base/a/b", m.buildMinioPath("/a/b/"))
+	assert.Equal(t, "base/", m.buildMinioDirPrefix(""))
+	assert.Equal(t, "base/a/", m.buildMinioDirPrefix("/a/"))
+}
+
+func TestS3StorageBadRequest(t *testing.T) {
+	endpoint := os.Getenv("TEST_MINIO_ENDPOINT")
+	if endpoint == "" {
+		t.Skip("TEST_MINIO_ENDPOINT not set")
+		return
+	}
+	cfg := &setting.Storage{
+		MinioConfig: setting.MinioStorageConfig{
+			Endpoint:        endpoint,
+			AccessKeyID:     "123456",
+			SecretAccessKey: "12345678",
+			Bucket:          "bucket",
+			Location:        "us-east-1",
+		},
+	}
+	message := "ERROR"
+	old := getBucketVersioning
+	defer func() { getBucketVersioning = old }()
+	getBucketVersioning = func(ctx context.Context, minioClient *minio.Client, bucket string) error {
+		return minio.ErrorResponse{
+			StatusCode: http.StatusBadRequest,
+			Code:       "FixtureError",
+			Message:    message,
+		}
+	}
+	_, err := NewStorage(setting.MinioStorageType, cfg)
+	require.ErrorContains(t, err, message)
+}
+
+func TestMinioCredentials(t *testing.T) {
+	const (
+		ExpectedAccessKey       = "ExampleAccessKeyID"
+		ExpectedSecretAccessKey = "ExampleSecretAccessKeyID"
+		// Use a FakeEndpoint for IAM credentials to avoid logging any
+		// potential real IAM credentials when running in EC2.
+		FakeEndpoint = "http://localhost"
+	)
+
+	t.Run("Static Credentials", func(t *testing.T) {
+		cfg := setting.MinioStorageConfig{
+			AccessKeyID:     ExpectedAccessKey,
+			SecretAccessKey: ExpectedSecretAccessKey,
+			IamEndpoint:     FakeEndpoint,
+		}
+		creds := buildMinioCredentials(cfg)
+		v, err := creds.Get()
+
+		require.NoError(t, err)
+		assert.Equal(t, ExpectedAccessKey, v.AccessKeyID)
+		assert.Equal(t, ExpectedSecretAccessKey, v.SecretAccessKey)
+	})
+
+	t.Run("Chain", func(t *testing.T) {
+		cfg := setting.MinioStorageConfig{
+			IamEndpoint: FakeEndpoint,
+		}
+
+		t.Run("EnvMinio", func(t *testing.T) {
+			t.Setenv("MINIO_ACCESS_KEY", ExpectedAccessKey+"Minio")
+			t.Setenv("MINIO_SECRET_KEY", ExpectedSecretAccessKey+"Minio")
+
+			creds := buildMinioCredentials(cfg)
+			v, err := creds.Get()
+
+			require.NoError(t, err)
+			assert.Equal(t, ExpectedAccessKey+"Minio", v.AccessKeyID)
+			assert.Equal(t, ExpectedSecretAccessKey+"Minio", v.SecretAccessKey)
+		})
+
+		t.Run("EnvAWS", func(t *testing.T) {
+			t.Setenv("AWS_ACCESS_KEY", ExpectedAccessKey+"AWS")
+			t.Setenv("AWS_SECRET_KEY", ExpectedSecretAccessKey+"AWS")
+
+			creds := buildMinioCredentials(cfg)
+			v, err := creds.Get()
+
+			require.NoError(t, err)
+			assert.Equal(t, ExpectedAccessKey+"AWS", v.AccessKeyID)
+			assert.Equal(t, ExpectedSecretAccessKey+"AWS", v.SecretAccessKey)
+		})
+
+		t.Run("FileMinio", func(t *testing.T) {
+			t.Setenv("MINIO_SHARED_CREDENTIALS_FILE", "testdata/minio.json")
+			// prevent loading any actual credentials files from the user
+			t.Setenv("AWS_SHARED_CREDENTIALS_FILE", "testdata/fake")
+
+			creds := buildMinioCredentials(cfg)
+			v, err := creds.Get()
+
+			require.NoError(t, err)
+			assert.Equal(t, ExpectedAccessKey+"MinioFile", v.AccessKeyID)
+			assert.Equal(t, ExpectedSecretAccessKey+"MinioFile", v.SecretAccessKey)
+		})
+
+		t.Run("FileAWS", func(t *testing.T) {
+			// prevent loading any actual credentials files from the user
+			t.Setenv("MINIO_SHARED_CREDENTIALS_FILE", "testdata/fake.json")
+			t.Setenv("AWS_SHARED_CREDENTIALS_FILE", "testdata/aws_credentials")
+
+			creds := buildMinioCredentials(cfg)
+			v, err := creds.Get()
+
+			require.NoError(t, err)
+			assert.Equal(t, ExpectedAccessKey+"AWSFile", v.AccessKeyID)
+			assert.Equal(t, ExpectedSecretAccessKey+"AWSFile", v.SecretAccessKey)
+		})
+
+		t.Run("IAM", func(t *testing.T) {
+			// prevent loading any actual credentials files from the user
+			t.Setenv("MINIO_SHARED_CREDENTIALS_FILE", "testdata/fake.json")
+			t.Setenv("AWS_SHARED_CREDENTIALS_FILE", "testdata/fake")
+
+			// Spawn a server to emulate the EC2 Instance Metadata
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// The client will actually make 3 requests here,
+				// first will be to get the IMDSv2 token, second to
+				// get the role, and third for the actual
+				// credentials. However, we can return credentials
+				// every request since we're not emulating a full
+				// IMDSv2 flow.
+				w.Write([]byte(`{"Code":"Success","AccessKeyId":"ExampleAccessKeyIDIAM","SecretAccessKey":"ExampleSecretAccessKeyIDIAM"}`))
+			}))
+			defer server.Close()
+
+			// Use the provided EC2 Instance Metadata server
+			creds := buildMinioCredentials(setting.MinioStorageConfig{
+				IamEndpoint: server.URL,
+			})
+			v, err := creds.Get()
+
+			require.NoError(t, err)
+			assert.Equal(t, ExpectedAccessKey+"IAM", v.AccessKeyID)
+			assert.Equal(t, ExpectedSecretAccessKey+"IAM", v.SecretAccessKey)
+		})
+	})
+}
+
+func TestNewMinioStorageInitializationTimeout(t *testing.T) {
+	defer test.MockVariableValue(&getBucketVersioning, func(ctx context.Context, minioClient *minio.Client, bucket string) error {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(1 * time.Millisecond):
+			return minio.ErrorResponse{
+				StatusCode: http.StatusBadRequest,
+				Code:       "TestError",
+				Message:    "Mocked error for testing",
+			}
+		}
+	})()
+
+	settings := &setting.Storage{
+		MinioConfig: setting.MinioStorageConfig{
+			Endpoint:        "localhost",
+			AccessKeyID:     "123456",
+			SecretAccessKey: "12345678",
+			Bucket:          "bucket",
+			Location:        "us-east-1",
+		},
+	}
+
+	// Verify that we reach `getBucketVersioning` and return the error from our mock.
+	storage, err := NewMinioStorage(t.Context(), settings)
+	require.ErrorContains(t, err, "Mocked error for testing")
+	assert.Nil(t, storage)
+
+	defer test.MockVariableValue(&initializationTimeout, 1*time.Nanosecond)()
+
+	// Now that the timeout is super low, verify that we get a context deadline exceeded error from our mock.
+	storage, err = NewMinioStorage(t.Context(), settings)
+	require.Error(t, err)
+	require.ErrorIs(t, err, context.DeadlineExceeded, "err must be a context deadline exceeded error, but was %v", err)
+	assert.Nil(t, storage)
+}
+
+// newProxyServer starts an HTTP proxy server that implements CONNECT tunneling.
+// It sets proxied to true whenever any request is received.
+func newProxyServer(t *testing.T, proxied *atomic.Bool) *httptest.Server {
+	t.Helper()
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		proxied.Store(true)
+		if r.Method != http.MethodConnect {
+			http.Error(w, "only CONNECT is supported", http.StatusMethodNotAllowed)
+			return
+		}
+		targetConn, err := net.Dial("tcp", r.Host)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		defer targetConn.Close()
+		clientConn, _, err := w.(http.Hijacker).Hijack()
+		if err != nil {
+			return
+		}
+		defer clientConn.Close()
+		_, _ = clientConn.Write([]byte("HTTP/1.1 200 Connection Established\r\n\r\n"))
+		go io.Copy(targetConn, clientConn)
+		io.Copy(clientConn, targetConn)
+	}))
+}
+
+func TestMinioStorageProxy(t *testing.T) {
+	// Start a fake TLS S3-compatible server.
+	// `UseSSL: true` triggers CONNECT-style proxying.
+	// `InsecureSkipVerify: true` accepts the self-signed cert.
+	// `BucketLookup: path` forces path-style URLs so the fake server stays simple.
+	s3Server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			w.Header().Set("Content-Type", "application/xml")
+			fmt.Fprint(w, `<?xml version="1.0" encoding="UTF-8"?><VersioningConfiguration xmlns="http://test/"></VersioningConfiguration>`)
+		case http.MethodHead:
+			w.WriteHeader(http.StatusOK)
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer s3Server.Close()
+
+	minioStorageCfg := func() *setting.Storage {
+		return &setting.Storage{
+			MinioConfig: setting.MinioStorageConfig{
+				Endpoint:           s3Server.Listener.Addr().String(),
+				AccessKeyID:        "123456",
+				SecretAccessKey:    "12345678",
+				Bucket:             "bucket",
+				Location:           "us-east-1",
+				UseSSL:             true,
+				InsecureSkipVerify: true,
+				BucketLookup:       "path",
+			},
+		}
+	}
+
+	t.Run("ProxyIsUsed", func(t *testing.T) {
+		var proxied atomic.Bool
+		proxyServer := newProxyServer(t, &proxied)
+		defer proxyServer.Close()
+
+		proxyURL, err := url.Parse(proxyServer.URL)
+		require.NoError(t, err)
+
+		defer test.MockVariableValue(&setting.Proxy.Enabled, true)()
+		defer test.MockVariableValue(&setting.Proxy.ProxyURL, proxyServer.URL)()
+		defer test.MockVariableValue(&setting.Proxy.ProxyURLFixed, proxyURL)()
+		defer test.MockVariableValue(&setting.Proxy.ProxyHosts, []string{"*"})()
+
+		storage, err := NewMinioStorage(t.Context(), minioStorageCfg())
+		require.NoError(t, err)
+		assert.NotNil(t, storage)
+		assert.True(t, proxied.Load(), "expected minio client to connect through the proxy")
+	})
+
+	t.Run("ProxyIsNotUsed", func(t *testing.T) {
+		var proxied atomic.Bool
+		proxyServer := newProxyServer(t, &proxied)
+		defer proxyServer.Close()
+
+		proxyURL, err := url.Parse(proxyServer.URL)
+		require.NoError(t, err)
+
+		// Proxy is fully configured but disabled; minioClient should connect directly to s3Server.
+		defer test.MockVariableValue(&setting.Proxy.Enabled, false)()
+		defer test.MockVariableValue(&setting.Proxy.ProxyURL, proxyServer.URL)()
+		defer test.MockVariableValue(&setting.Proxy.ProxyURLFixed, proxyURL)()
+		defer test.MockVariableValue(&setting.Proxy.ProxyHosts, []string{"*"})()
+
+		storage, err := NewMinioStorage(t.Context(), minioStorageCfg())
+		require.NoError(t, err)
+		assert.NotNil(t, storage)
+		assert.False(t, proxied.Load(), "expected minio client to bypass the proxy when proxy is disabled")
+	})
+}

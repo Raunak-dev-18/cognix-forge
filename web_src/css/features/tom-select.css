@@ -1,0 +1,120 @@
+/* Copyright 2026 The Forgejo Authors. All rights reserved.
+ * SPDX-License-Identifier: GPL-3.0-or-later */
+
+.ts-hidden-accessible {
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  white-space: nowrap;
+}
+
+.ts-wrapper {
+  position: relative;
+  background: var(--color-input-background);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--border-radius);
+  padding: 4px;
+  min-height: 40px;
+}
+
+.ts-wrapper:hover {
+  border-color: var(--color-input-border-hover);
+}
+
+.ts-wrapper.focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.ts-wrapper .ts-control {
+  background: transparent;
+  border: none;
+  padding: 1px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.ts-wrapper .ts-control > .item {
+  background: var(--color-label-bg);
+  border: 1px solid var(--color-secondary);
+  border-radius: var(--border-radius);
+  padding: 2px 8px;
+  margin: 0;
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ts-wrapper .ts-control > .item .remove {
+  border: none;
+  color: var(--color-text-light);
+  padding: 0;
+  margin-inline-start: 2px;
+  text-decoration: none;
+}
+
+.ts-wrapper .ts-control > .item .remove:hover {
+  color: var(--color-text);
+  background: transparent;
+}
+
+.ts-wrapper .ts-control > .item.invalid {
+  background: var(--color-error-bg);
+  border-color: var(--color-error-border);
+}
+
+.ts-wrapper .ts-control input[type="text"] {
+  color: var(--color-input-text);
+  flex: 1;
+  min-width: 100px;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0;
+  line-height: 1.8;
+}
+
+.ts-wrapper .ts-dropdown {
+  position: absolute;
+  top: 100%;
+  inset-inline: 0;
+  z-index: 100;
+  background: var(--color-body);
+  border: 1px solid var(--color-secondary);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 8px var(--color-shadow);
+  margin-top: 4px;
+  max-block-size: 300px;
+  overflow-block: auto;
+}
+
+.ts-wrapper .ts-dropdown .option {
+  padding: 8px 12px;
+  color: var(--color-text);
+}
+
+.ts-wrapper .ts-dropdown .option.active,
+.ts-wrapper .ts-dropdown .option:hover {
+  background: var(--color-hover);
+}
+
+.ts-wrapper .ts-dropdown .option.selected {
+  background: var(--color-active);
+}
+
+.ts-wrapper .ts-dropdown .create {
+  padding: 8px 12px;
+  color: var(--color-text-light);
+}
+
+.ts-wrapper .ts-dropdown .create:hover {
+  background: var(--color-hover);
+  color: var(--color-text);
+}

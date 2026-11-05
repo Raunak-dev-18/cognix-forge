@@ -1,0 +1,7 @@
+{{/*
+Show the existing ServiceMessages (either Modal, Banner or both)
+*/}}
+
+{{if .ShowModalServiceMessage}}
+	{{template "base/modal_service_message" .}}
+{{end}}

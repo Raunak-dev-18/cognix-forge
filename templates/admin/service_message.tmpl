@@ -1,0 +1,44 @@
+{{template "admin/layout_head" (dict "ctxData" . "pageClass" "admin config")}}
+{{/* TODO Add input for service message type "Banner" */}}
+
+{{if .IsAdminPreview}}
+	{{template "base/modal_service_message" .}}
+{{end}}
+
+<div class="ui container">
+	<h4 class="ui top attached header">
+		{{ctx.Locale.Tr "admin.service_message.type_modal"}}
+	</h4>
+	<div class="ui attached segment">
+		<form class="ui segment comment service-message form" method="post" action="{{AppSubUrl}}/admin/service_message?sm_type=modal" enctype="multipart/form-data">
+			<fieldset>
+				<label>
+					{{ctx.Locale.Tr "admin.service_message.title"}}
+					<input name="title" placeholder={{ctx.Locale.Tr "admin.service_message.title_description"}} value="{{.ModalServiceMessageTitle}}" autofocus required maxlength="128">
+				</label>
+				<label>
+					{{ctx.Locale.Tr "admin.service_message.text"}}
+					{{/*Apparently the combomarkdowneditor will not work without being wrapped in a div of class comment ...*/}}
+					<div class="comment">
+					{{template "shared/combomarkdowneditor" (dict
+						"MarkdownPreviewUrl" (print .Link "/markup")
+						"MarkdownPreviewContext" .Link
+						"TextareaName" "text"
+						"TextareaContent" .ModalServiceMessageText
+						"TextareaPlaceholder"  (ctx.Locale.Tr "admin.service_message.message_place_holder")
+						"DropzoneParentContainer" ""
+						"DisableTextExpander" "true"
+						"DisableAutosize" "true"
+					)}}
+					</div>
+				</label>
+			</fieldset>
+			<div class="field button-sequence">
+				<button name="save" class="ui primary button">{{ctx.Locale.Tr "save"}}</button>
+				<button name="preview" class="ui button" id="preview-service-message-button">{{ctx.Locale.Tr "preview"}}</button>
+				<button id="delete-sm-button" name="delete" class="ui button link-action {{if not .ModalServiceMessageTitle}}disabled{{end}}" data-url="{{AppSubUrl}}/admin/service_message/delete?sm_type=modal">{{ctx.Locale.Tr "admin.service_message.delete"}}</button>
+			</div>
+		</form>
+	</div>
+</div>
+{{template "admin/layout_footer" .}}

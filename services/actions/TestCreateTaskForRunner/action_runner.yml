@@ -1,0 +1,11 @@
+- id: 41601
+  uuid: 61a71de6-8127-40c9-a30e-63647e93edad
+  owner_id: 2
+  ephemeral: true
+  agent_labels: '["debian", "fedora"]'
+
+- id: 41602
+  uuid: fae04d20-98ae-4b69-8439-213dac373e19
+  owner_id: 2
+  ephemeral: false
+  agent_labels: '["debian", "fedora"]'

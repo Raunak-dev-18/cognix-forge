@@ -1,0 +1,31 @@
+<button type="button" class="ui text primary btn tw-px-4 tw-py-2" command="show-modal" commandfor="search-syntax-modal" aria-label="{{ctx.Locale.Tr "search.syntax"}}">{{svg "octicon-question"}}</button>
+<dialog class="modal" id="search-syntax-modal" closedby="any">
+	<article>
+		<header>{{ctx.Locale.Tr "search.syntax"}}</header>
+		<div class="content">
+			{{ctx.Locale.Tr "search.docs" (AppDocsURL "user/search/issue-search/")}}
+			<dl class="search-syntax-list">
+					{{range $filter, $tr :=
+						dict
+							"is:open" (ctx.Locale.TrString "repo.issues.open_title")
+							"is:closed" (ctx.Locale.TrString "repo.issues.closed_title")
+							"is:all" (ctx.Locale.TrString "repo.issues.all_title")
+							"author:<username>" (ctx.Locale.TrString "repo.issues.filter_poster.hint")
+							"assignee:<username>" (ctx.Locale.TrString "repo.issues.filter_assignee.hint")
+							"review:<username>" (ctx.Locale.TrString "repo.issues.filter_reviewers.hint")
+							"mentions:<username>" (ctx.Locale.TrString "repo.issues.filter_mention.hint")
+							"sort:<by>:[asc|desc]" (ctx.Locale.Tr "repo.issues.filter_sort.hint_with_placeholder" (HTMLFormat "<code>created|comments|updated|deadline</code>"))
+							"modified:[>|<]<date>" (ctx.Locale.TrString "repo.issues.filter_modified.hint")
+							"\"forgejo\"" (ctx.Locale.TrString "search.match_inside_quotes")}}
+						<div class="row">
+							<dt><code>{{$filter}}</code></dt>
+							<dd>{{$tr}}</td>
+						</div>
+					{{end}}
+			</dl>
+		</div>
+		<footer class="actions">
+			<button type="button" class="secondary button" command="close" commandfor="search-syntax-modal">{{ctx.Locale.Tr "modal.close"}}</button>
+		</footer>
+	</article>
+</dialog>

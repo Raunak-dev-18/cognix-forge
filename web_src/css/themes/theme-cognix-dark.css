@@ -1,0 +1,341 @@
+@import "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap";
+@import "../chroma/dark.css";
+@import "../codemirror/dark.css";
+@import "../markup/dark.css";
+@import "../cognix-brand.css";
+
+:root {
+  --is-dark-theme: true;
+  /* Cognix brand tokens (dark tone)
+     ground #080808 · surface #141414 · text #F2EFE9
+     Cognix Green #4ADE80 · Deep Green (text) #35AD61 · Gray #2E2E2C */
+  --cognix-green: #4ade80;
+  --cognix-deep-green: #35ad61;
+  --cognix-ink: #080808;
+  --cognix-ground: #080808;
+  --cognix-surface: #141414;
+  --cognix-gray: #2e2e2c;
+  --cognix-shadow-card: rgba(0, 0, 0, 0.5);
+  --cognix-inner-highlight: rgba(255, 255, 255, 0.04);
+
+  --color-primary: #4ade80;
+  --color-primary-contrast: #080808;
+  --color-primary-dark-1: #5fe48e;
+  --color-primary-dark-2: #74eaa0;
+  --color-primary-dark-3: #8bf0b2;
+  --color-primary-dark-4: #a2f5c4;
+  --color-primary-light-1: #3ec570;
+  --color-primary-light-2: #35ad61;
+  --color-primary-light-3: #2c9553;
+  --color-primary-light-4: #237d45;
+  --color-primary-light-5: #1a5a32;
+  --color-primary-light-6: #0f2f1b;
+  --color-primary-light-7: #060f0a;
+  --color-primary-alpha-10: #4ade8019;
+  --color-primary-alpha-20: #4ade8033;
+  --color-primary-alpha-30: #4ade804b;
+  --color-primary-alpha-40: #4ade8066;
+  --color-primary-alpha-50: #4ade8080;
+  --color-primary-alpha-60: #4ade8099;
+  --color-primary-alpha-70: #4ade80b3;
+  --color-primary-alpha-80: #4ade80cc;
+  --color-primary-alpha-90: #4ade80e1;
+  --color-primary-hover: var(--color-primary-dark-1);
+  --color-primary-active: var(--color-primary-dark-2);
+  --color-secondary: #3f3f3c;
+  --color-secondary-dark-1: #4a4a46;
+  --color-secondary-dark-2: #55554f;
+  --color-secondary-dark-3: #66665f;
+  --color-secondary-dark-4: #78786f;
+  --color-secondary-dark-5: #87877d;
+  --color-secondary-dark-6: #96968b;
+  --color-secondary-dark-7: #a5a599;
+  --color-secondary-dark-8: #b4b4a7;
+  --color-secondary-dark-9: #c3c3b5;
+  --color-secondary-dark-10: #d2d2c3;
+  --color-secondary-dark-11: #e1e1d1;
+  --color-secondary-dark-12: #f0f0df;
+  --color-secondary-dark-13: #f5f5e9;
+  --color-secondary-light-1: #333331;
+  --color-secondary-light-2: #2e2e2c;
+  --color-secondary-light-3: #232321;
+  --color-secondary-light-4: #191918;
+  --color-secondary-alpha-10: #3f3f3c19;
+  --color-secondary-alpha-20: #3f3f3c33;
+  --color-secondary-alpha-30: #3f3f3c4b;
+  --color-secondary-alpha-40: #3f3f3c66;
+  --color-secondary-alpha-50: #3f3f3c80;
+  --color-secondary-alpha-60: #3f3f3c99;
+  --color-secondary-alpha-70: #3f3f3cb3;
+  --color-secondary-alpha-80: #3f3f3ccc;
+  --color-secondary-alpha-90: #3f3f3ce1;
+  --color-secondary-hover: var(--color-secondary-dark-3);
+  --color-secondary-active: var(--color-secondary-dark-2);
+  /* console colors - used for actions console and console files */
+  --color-console-fg: #f2efe9;
+  --color-console-fg-subtle: #b8b5ae;
+  --color-console-bg: #121212;
+  --color-console-border: #2e2e2c;
+  --color-console-hover-bg: #1f1f1d;
+  --color-console-active-bg: #2e2e2c;
+  --color-console-menu-bg: #191917;
+  --color-console-menu-border: #3a3a38;
+  /* named colors */
+  --color-red: #e06666;
+  --color-orange: #f08a4a;
+  --color-yellow: #eabf3a;
+  --color-olive: #a3b24a;
+  --color-green: #4ade80;
+  --color-teal: #2ab8ac;
+  --color-blue: #6fa8dc;
+  --color-violet: #9b85e0;
+  --color-purple: #bc6bd6;
+  --color-pink: #db62a8;
+  --color-brown: #ad8667;
+  --color-black: #0d0d0d;
+  /* light variants - produced via Sass scale-color(color, $lightness: +10%) */
+  --color-red-light: #e67979;
+  --color-orange-light: #f4a06e;
+  --color-yellow-light: #efcb56;
+  --color-olive-light: #b2c05e;
+  --color-green-light: #7cf0a0;
+  --color-teal-light: #4ccabc;
+  --color-blue-light: #86b8e4;
+  --color-violet-light: #ad9ce8;
+  --color-purple-light: #ca87e0;
+  --color-pink-light: #e47cb6;
+  --color-brown-light: #bd9878;
+  --color-black-light: #353530;
+  /* dark 1 variants - produced via Sass scale-color(color, $lightness: -10%) */
+  --color-red-dark-1: #d55555;
+  --color-orange-dark-1: #e87c36;
+  --color-yellow-dark-1: #ddb52c;
+  --color-olive-dark-1: #94a33f;
+  --color-green-dark-1: #3ec570;
+  --color-teal-dark-1: #24a599;
+  --color-blue-dark-1: #5c98d1;
+  --color-violet-dark-1: #8a72da;
+  --color-purple-dark-1: #af5acb;
+  --color-pink-dark-1: #d0519a;
+  --color-brown-dark-1: #9d7757;
+  --color-black-dark-1: #080808;
+  /* dark 2 variants - produced via Sass scale-color(color, $lightness: -20%) */
+  --color-red-dark-2: #c94444;
+  --color-orange-dark-2: #e06e22;
+  --color-yellow-dark-2: #d0ab1f;
+  --color-olive-dark-2: #859335;
+  --color-green-dark-2: #35ad61;
+  --color-teal-dark-2: #1e9386;
+  --color-blue-dark-2: #4a88c6;
+  --color-violet-dark-2: #795fd4;
+  --color-purple-dark-2: #a247bf;
+  --color-pink-dark-2: #c5408c;
+  --color-brown-dark-2: #8d6748;
+  --color-black-dark-2: #050505;
+  /* ansi colors used for actions console and console files */
+  --color-ansi-black: #1f1f1d;
+  --color-ansi-red: #cc4848;
+  --color-ansi-green: #4ade80;
+  --color-ansi-yellow: #cc9903;
+  --color-ansi-blue: #3a8ac6;
+  --color-ansi-magenta: #d22e8b;
+  --color-ansi-cyan: #00918a;
+  --color-ansi-white: var(--color-console-fg-subtle);
+  --color-ansi-bright-black: #46464a;
+  --color-ansi-bright-red: #d15a5a;
+  --color-ansi-bright-green: #7cf0a0;
+  --color-ansi-bright-yellow: #eaaf03;
+  --color-ansi-bright-blue: #4e96cc;
+  --color-ansi-bright-magenta: #d74397;
+  --color-ansi-bright-cyan: #00b6ad;
+  --color-ansi-bright-white: var(--color-console-fg);
+  /* other colors */
+  --color-grey: #55554f;
+  --color-grey-light: #82827d;
+  --color-gold: #b1983b;
+  --color-white: #ffffff;
+  --color-diff-removed-word-bg: #6f3333;
+  --color-diff-added-word-bg: #356540;
+  --color-diff-removed-row-bg: #3c2626;
+  --color-diff-moved-row-bg: #818044;
+  --color-diff-added-row-bg: #24402b;
+  --color-diff-removed-row-border: #634343;
+  --color-diff-moved-row-border: #bcca6f;
+  --color-diff-added-row-border: #2f4d38;
+  --color-diff-inactive: #1a1a19;
+  --color-error-border: #a04141;
+  --color-error-bg: #3a2222;
+  --color-error-bg-active: #4d2a2a;
+  --color-error-bg-hover: #452626;
+  --color-error-text: #f9cbcb;
+  --color-success-border: #2c6b45;
+  --color-success-bg: #14251b;
+  --color-success-text: #4ade80;
+  --color-warning-border: #bb9d00;
+  --color-warning-bg: #33301f;
+  --color-warning-text: #eabf3a;
+  --color-info-border: #306090;
+  --color-info-bg: #1e2a3a;
+  --color-info-text: #6fa8dc;
+  --color-red-badge: #db2828;
+  --color-red-badge-bg: #db28281a;
+  --color-red-badge-hover-bg: #db28284d;
+  --color-green-badge: #4ade80;
+  --color-green-badge-bg: #4ade801a;
+  --color-green-badge-hover-bg: #4ade804d;
+  --color-yellow-badge: #eabf3a;
+  --color-yellow-badge-bg: #eabf3a1a;
+  --color-yellow-badge-hover-bg: #eabf3a4d;
+  --color-orange-badge: #f08a4a;
+  --color-orange-badge-bg: #f08a4a1a;
+  --color-orange-badge-hover-bg: #f08a4a4d;
+
+  /* A more declarative way for themes */
+  --thin-lightness: 0.68;
+  --regular-chroma: 0.16;
+  --hue-green: 145deg;
+  --hue-red: 25deg;
+  --hue-purple: 298deg;
+  --hue-violet: 293deg;
+  --hue-orange: 41deg;
+  --hue-blue: 245deg;
+
+  /* target-based colors */
+  --color-body: #080808;
+  --color-box-header: #101010;
+  --color-box-body: #141414;
+  --color-box-body-highlight: #1e1e1c;
+  --color-text-dark: #f2efe9;
+  --color-text: #e8e5de;
+  --color-text-light: #b5b2aa;
+  --color-text-light-1: #9c9992;
+  --color-text-light-2: #84817a;
+  --color-text-light-3: #6b6963;
+  --color-footer: var(--color-nav-bg);
+  --color-timeline: #2a2a28;
+  --color-input-text: var(--color-text-dark);
+  --color-input-background: #101010;
+  --color-input-toggle-background: #2e2e2c;
+  --color-input-border: var(--color-secondary);
+  --color-input-border-hover: var(--color-secondary-dark-1);
+  --color-light: #f2efe90f;
+  --color-light-mimic-enabled: rgba(0, 0, 0, calc(40 / 255 * 222 / 255 / var(--opacity-disabled)));
+  --color-light-border: #f2efe91f;
+  --color-hover: #f2efe91a;
+  --color-active: #262624;
+  --color-menu: #141414;
+  --color-card: #141414;
+  --fancy-card-bg: #141414;
+  --fancy-card-border: #2e2e2c;
+  --color-markup-table-row: #f2efe908;
+  --color-markup-code-block: #f2efe90d;
+  --color-markup-code-inline: #f2efe91a;
+  --color-button: #1a1a18;
+  --color-code-bg: #111110;
+  --color-shadow: #00000066;
+  --color-secondary-bg: #1e1e1c;
+  --color-expand-button: #232322;
+  --color-placeholder-text: var(--color-text-light-3);
+  --color-editor-line-highlight: var(--color-primary-light-5);
+  --color-project-column-bg: var(--color-secondary-light-2);
+  --color-caret: var(--color-text);
+  --color-reaction-bg: #f2efe912;
+  --color-reaction-hover-bg: var(--color-primary-light-4);
+  --color-reaction-active-bg: var(--color-primary-light-5);
+  --color-tooltip-text: #f2efe9;
+  --color-tooltip-bg: #000000f0;
+  --color-nav-bg: #0a0a0a;
+  --color-nav-hover-bg: var(--color-secondary-light-1);
+  --color-secondary-nav-bg: #111111;
+  --color-label-text: var(--color-text);
+  --color-label-bg: #f2efe91a;
+  --color-label-hover-bg: #f2efe933;
+  --color-label-active-bg: #f2efe973;
+  --color-accent: var(--color-primary-dark-1);
+  --color-small-accent: var(--color-primary-light-5);
+  --color-highlight-fg: #d9be6a;
+  --color-highlight-bg: #2a2416;
+  --color-overlay-backdrop: #080808c0;
+  --color-selection-bg: #4ade80;
+  --color-selection-fg: #080808;
+  /* pattern colors for image diff */
+  --checkerboard-color-1: #2a2a28;
+  --checkerboard-color-2: #1a1a19;
+  --color-indicator-offline: #7a776f;
+  --color-indicator-offline-20: #7a776f1a;
+  --color-indicator-idle: #2c9553;
+  --color-indicator-idle-20: #2c95531a;
+  --color-indicator-active: #4ade80;
+  --color-indicator-active-20: #4ade8033;
+  accent-color: var(--color-accent);
+  color-scheme: dark;
+
+  /* Cognix brand type and shape */
+  --fonts-proportional: "Geist", "Inter", -apple-system, "Segoe UI", system-ui, "Noto Sans", "Liberation Sans", sans-serif;
+  --fonts-monospace: "Geist Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --border-radius: 8px;
+}
+
+/* Brand polish: quiet, precise, minimal */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--color-selection-bg);
+  color: var(--color-selection-fg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-text-dark);
+  outline-offset: 2px;
+}
+
+/* Green / positive buttons carry brand green on dark: they need ink text. */
+.ui.green.button,
+.ui.green.buttons .button,
+.ui.green.button:focus,
+.ui.green.buttons .button:focus,
+.ui.positive.button,
+.ui.positive.buttons .button,
+.ui.positive.button:focus,
+.ui.positive.buttons .button:focus {
+  color: var(--color-primary-contrast);
+}
+
+.ui.green.button:hover,
+.ui.green.buttons .button:hover,
+.ui.positive.button:hover,
+.ui.positive.buttons .button:hover {
+  color: var(--color-primary-contrast);
+}
+
+/* invert emojis that are hard to read otherwise */
+.emoji[aria-label="check mark"],
+.emoji[aria-label="currency exchange"],
+.emoji[aria-label="TOP arrow"],
+.emoji[aria-label="END arrow"],
+.emoji[aria-label="ON! arrow"],
+.emoji[aria-label="SOON arrow"],
+.emoji[aria-label="heavy dollar sign"],
+.emoji[aria-label="copyright"],
+.emoji[aria-label="registered"],
+.emoji[aria-label="trade mark"],
+.emoji[aria-label="multiply"],
+.emoji[aria-label="plus"],
+.emoji[aria-label="minus"],
+.emoji[aria-label="divide"],
+.emoji[aria-label="curly loop"],
+.emoji[aria-label="double curly loop"],
+.emoji[aria-label="wavy dash"],
+.emoji[aria-label="paw prints"],
+.emoji[aria-label="musical note"],
+.emoji[aria-label="musical notes"] {
+  filter: invert(100%) hue-rotate(180deg);
+}

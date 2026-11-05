@@ -1,0 +1,102 @@
+{{template "base/head" .}}
+
+<div class="page-content ui container">
+	<h1>Buttons</h1>
+
+	<p>
+		Supported elements: <code class="inline-code-block">&lt;a&gt;</code>, <code class="inline-code-block">&lt;button&gt;</code>.
+	</p>
+	<p>
+		Common classes: <code class="inline-code-block">button</code> (required), <code class="inline-code-block">disabled</code>.
+	</p>
+	<p>
+		Display styles:
+		<a href="#primary"><code class="inline-code-block">primary</code></a>,
+		<a href="#secondary"><code class="inline-code-block">secondary</code></a>,
+		<a href="#danger"><code class="inline-code-block">danger</code></a>.
+		<br>
+	</p>
+	<p>
+		Can optionally contain an icon.
+	</p>
+
+	<h2><code class="inline-code-block">&lt;a&gt;</code>-based</h2>
+
+	<p>
+		For page navigation.
+	</p>
+
+	<h3 id="primary">Primary</h2>
+	<div class="button-sequence">
+		<a class="primary button" href="#noscroll">
+			Follow
+		</a>
+		<a class="primary disabled button" href="#noscroll">
+			{{svg "octicon-person"}}
+			{{ctx.Locale.Tr "user.follow"}}
+		</a>
+	</div>
+
+	<h3 id="secondary">Secondary</h2>
+	<div class="button-sequence">
+		<a class="secondary button" href="#noscroll">
+			Unfollow
+		</a>
+		<a class="secondary disabled button" href="#noscroll">
+			{{svg "octicon-person"}}
+			{{ctx.Locale.Tr "user.unfollow"}}
+		</a>
+	</div>
+
+	<h3 id="danger">Danger</h2>
+	<div class="button-sequence">
+		<a class="danger button" href="#noscroll">
+			Delete
+		</a>
+		<a class="danger disabled button" href="#noscroll">
+			{{svg "octicon-trash"}}
+			Delete
+		</a>
+	</div>
+
+	<h2><code class="inline-code-block">&lt;button&gt;</code>-based</h2>
+
+	<p>
+		For executing JS actions or submitting forms.
+	</p>
+
+	<h3 id="primary">Primary</h2>
+	<div class="button-sequence">
+		<button class="primary button" type="button">
+			Follow
+		</button>
+		<button class="primary disabled button" type="button">
+			{{svg "octicon-person"}}
+			{{ctx.Locale.Tr "user.follow"}}
+		</button>
+	</div>
+
+	<h3 id="secondary">Secondary</h2>
+	<div class="button-sequence">
+		<button class="secondary button" type="button">
+			Unfollow
+		</button>
+		<button class="secondary disabled button" type="button">
+			{{svg "octicon-person"}}
+			{{ctx.Locale.Tr "user.unfollow"}}
+		</button>
+	</div>
+
+	<h3 id="danger">Danger</h2>
+	<div class="button-sequence">
+		<button class="danger button" type="button">
+			Delete
+		</button>
+		<button class="danger disabled button" type="button">
+			{{svg "octicon-trash"}}
+			Delete
+		</button>
+	</div>
+</div>
+
+{{template "base/footer" .}}

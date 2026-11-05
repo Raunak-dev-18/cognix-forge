@@ -1,0 +1,64 @@
+# Copyright 2024 The Forgejo Authors
+# SPDX-License-Identifier: MIT
+#
+# To modify this workflow:
+#
+#  - push it to the wip-ci-end-to-end branch on the forgejo repository
+#    otherwise it will not have access to the secrets required to push
+#    the cascading PR
+#
+#  - once it works, open a pull request for the sake of keeping track
+#    of the change even if the PR won't run it because it will use
+#    whatever is in the default branch instead
+#
+#  - after it is merged, double check it works by setting the
+#    run-end-to-end-test on a pull request (any pull request will do)
+#
+name: issue-labels
+
+on:
+  push:
+    branches:
+      - 'wip-ci-end-to-end'
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - labeled
+      - closed
+
+jobs:
+  cascade:
+    if: >
+      vars.ROLE == 'forgejo-coding' && (
+        forgejo.event_name == 'push' || (
+          forge.event_name == 'pull_request_target' && (
+            forge.event.action == 'closed' ||
+            ( forge.event.action == 'opened' && contains(forge.event.pull_request.labels.*.name, 'run-end-to-end-tests') ) ||
+            ( forge.event.action == 'synchronized' && contains(forge.event.pull_request.labels.*.name, 'run-end-to-end-tests') ) ||
+            ( forge.event.action == 'label_updated' && forge.event.label.name == 'run-end-to-end-tests' )
+          )
+        )
+      )
+    runs-on: docker
+    container:
+      image: data.forgejo.org/oci/node:24-trixie
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: '0'
+          show-progress: 'false'
+      - uses: https://data.forgejo.org/actions/cascading-pr@b52d5b1f4f7bc3dd8b9f6ceca3a05aea6e9920be # v2.3.2
+        with:
+          origin-url: ${{ env.GITHUB_SERVER_URL }}
+          origin-repo: ${{ github.repository }}
+          origin-token: ${{ secrets.END_TO_END_CASCADING_PR_ORIGIN }}
+          origin-pr: ${{ github.event.pull_request.number }}
+          origin-ref: ${{ github.event_name == 'push' && github.event.ref || '' }}
+          destination-url: https://code.forgejo.org
+          destination-fork-repo: cascading-pr/end-to-end
+          destination-repo: forgejo/end-to-end
+          destination-branch: main
+          destination-token: ${{ secrets.END_TO_END_CASCADING_PR_DESTINATION }}
+          close: true
+          update: .forgejo/cascading-pr-end-to-end

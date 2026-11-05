@@ -1,0 +1,113 @@
+/* Copyright 2024-2025 The Forgejo Authors. All rights reserved.
+ * SPDX-License-Identifier: GPL-3.0-or-later */
+
+:root {
+  --button-min-height: 36px;
+  --button-padding-inline: 1.35rem;
+}
+
+:root .small:is(.button, .button-row, .button-sequence) {
+  --button-min-height: 34px;
+  --button-padding-inline: 1.25rem;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --button-min-height: 40px;
+  }
+
+  :root .small:is(.button, .button-row, .button-sequence) {
+    --button-min-height: 38px;
+  }
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--button-min-height);
+  padding-block: 0;
+  padding-inline: var(--button-padding-inline);
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--border-radius);
+  font-weight: var(--font-weight-medium);
+
+  background: var(--button-background);
+  border: 1px solid var(--button-border-color);
+  color: var(--button-color);
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+    background: var(--button-background-hover, var(--button-background));
+    color: var(--button-color-hover, var(--button-color));
+  }
+
+  &.disabled {
+    opacity: var(--opacity-disabled);
+    pointer-events: none;
+  }
+
+  &:focus-visible {
+    /* Outline colors are defined by styles individually since there isn't a
+     * single consistent parameter to use as an anchor */
+    outline: 3px solid var(--button-outline-color);
+    /* Ensure outline shows over nearby elements */
+    z-index: 20;
+  }
+}
+
+.button.primary {
+  --button-background: var(--color-primary);
+  --button-background-hover: var(--color-primary-hover);
+  --button-border-color: var(--color-primary-dark-2);
+  --button-color: var(--color-primary-contrast);
+  --button-outline-color: oklch(from var(--button-background) l c h / 0.3);
+}
+
+.button.secondary {
+  --button-background: var(--color-button);
+  --button-border-color: var(--color-light-border);
+  --button-color: var(--color-text-light);
+  --button-color-hover: var(--color-text);
+  --button-outline-color: oklch(from var(--button-border-color) l c h / 0.1);
+}
+
+.button.danger {
+  /* Fallback is needed while --color-danger-bg is not supplied by all themes */
+  --button-background: var(--color-danger-bg, var(--color-error-bg));
+  --button-border-color: var(--color-thin-red);
+  --button-color: var(--color-thin-red);
+  --button-color-hover: var(--color-thin-red-highlight, var(--color-red));
+  --button-outline-color: oklch(from var(--button-border-color) l c h / 0.3);
+}
+
+/* Dropdown openers should be at least tall as buttons they are in line with, and
+ * as wide as they are tall */
+:is(.button-row, .button-sequence) .dialog-dropdown > .opener {
+  min-height: var(--button-min-height);
+  min-width: var(--button-min-height);
+}
+
+/* button-row is a simple helper made to improve consistency of fomantic buttons
+ * placed in a row. It provides gap and cancels out fomantic's margins */
+.button-row {
+  gap: var(--button-spacing);
+}
+
+/* button-sequence is a more complex helper that has wrap. Using it is preferred
+ * but also requires deeper consideration */
+.button-sequence {
+  display: flex;
+  flex-flow: wrap;
+  gap: var(--button-spacing);
+}
+
+/* Fomantic buttons have annoying margins to set distance between elements. In
+ * the button-row/sequence helpers this is set by flex+gap */
+.button-row .ui.button {
+  margin-inline-end: 0;
+}
+.button-sequence .ui.button {
+  margin: 0 !important;
+}

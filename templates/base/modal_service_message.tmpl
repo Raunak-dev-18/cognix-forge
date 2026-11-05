@@ -1,0 +1,24 @@
+<div class="ui dimmer transition active" id="service-message-modal">
+	<dialog open="true">
+		<article>
+			<header class="service-message-header">{{.ModalServiceMessageTitle}}</header>
+			<div class="service-message-content">
+				{{(.RenderedContent)}}
+			</div>
+			<div class="actions button-sequence">
+				{{if .IsAdminPreview}}
+					<form class="ui form" method="post" action="{{AppSubUrl}}/admin/service_message/preview?sm_type=modal&status=closed">
+						<input type="hidden" name="title" value="{{.ModalServiceMessageTitle}}">
+						<input type="hidden" name="text" value="{{.ModalServiceMessageText}}">
+						<button class="ui button" id="cancel-sm-preview-button">{{svg "octicon-x"}} {{ctx.Locale.Tr "admin.service_message.close_preview"}}</button>
+					</form>
+				{{else}}
+					<form class="ui form" method="post" action="{{AppSubUrl}}/user/confirm?sm_type=modal&redirect_to={{.CurrentURL}}">
+						<button class="ui primary ok button">{{svg "octicon-check"}} {{ctx.Locale.Tr "modal.confirm"}}</button>
+					</form>
+					<button class="ui ok button link-action" data-url="{{AppSubUrl}}/user/logout">{{svg "octicon-x"}} {{ctx.Locale.Tr "modal.cancel"}}</button>
+				{{end}}
+			</div>
+		</article>
+	</dialog>
+</div>

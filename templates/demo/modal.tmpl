@@ -1,0 +1,41 @@
+{{template "base/head" .}}
+
+<div class="page-content ui container">
+	<h1>Modals</h1>
+
+	<div class="button-sequence">
+		<button type="button" class="secondary button" command="show-modal" commandfor="short-modal">Short</button>
+		<button type="button" class="secondary button" command="show-modal" commandfor="medium-modal">Medium</button>
+		<button type="button" class="secondary button" command="show-modal" commandfor="long-modal">Long</button>
+	</div>
+
+	<dialog class="modal" id="short-modal" closedby="any">
+		<article>
+			<header>Short modal</header>
+			<div class="content">🐈</div>
+			<footer class="actions">
+				<button type="button" class="secondary button" command="close" commandfor="short-modal">{{ctx.Locale.Tr "modal.close"}}</button>
+			</footer>
+		</article>
+	</dialog>
+	<dialog class="modal" id="medium-modal" closedby="any">
+		<article>
+			<header>Medium modal</header>
+			<div class="content">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</div>
+			<footer class="actions">
+				<button type="button" class="secondary button" command="close" commandfor="medium-modal">{{ctx.Locale.Tr "modal.close"}}</button>
+			</footer>
+		</article>
+	</dialog>
+	<dialog class="modal" id="long-modal" closedby="any">
+		<article>
+			<header>Long modal</header>
+			<div class="content">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</div>
+			<footer class="actions">
+				<button type="button" class="secondary button" command="close" commandfor="long-modal">{{ctx.Locale.Tr "modal.close"}}</button>
+			</footer>
+		</article>
+	</dialog>
+</div>
+
+{{template "base/footer" .}}

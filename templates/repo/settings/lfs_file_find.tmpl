@@ -1,0 +1,39 @@
+{{template "repo/settings/layout_head" (dict "ctxData" . "pageClass" "repository settings lfs")}}
+	<div class="user-main-content twelve wide column content repository file list">
+		<div class="tab-size-8 non-diff-file-content">
+			<h4 class="ui top attached header">
+				<a href="{{.LFSFilesLink}}">{{ctx.Locale.Tr "repo.settings.lfs"}}</a> / <span class="truncate sha">{{.Oid}}</span>
+			</h4>
+			<table id="lfs-files-find-table" class="ui attached segment single line table">
+				<tbody>
+					{{if .Results}}
+					<tr>
+						<td>{{ctx.Locale.Tr "repo.files.filename"}}</td>
+						<td>{{ctx.Locale.Tr "repo.branch"}}</td>
+						<td>{{ctx.Locale.Tr "repo.commit"}}</td>
+						<td>{{ctx.Locale.Tr "repo.commits.date"}}</td>
+					</tr>
+					{{end}}
+					{{range .Results}}
+						<tr>
+							<td>
+								<a href="{{$.RepoLink}}/src/commit/{{.SHA}}/{{PathEscapeSegments .Name}}">{{.Name}}</a>
+							</td>
+							<td>
+								<a class="primary" href="{{$.RepoLink}}/src/branch/{{PathEscapeSegments .BranchName}}">{{.BranchName}}</a>
+							</td>
+							<td>
+								<a class="primary sha" href="{{$.RepoLink}}/commit/{{.SHA}}">{{ShortSha .SHA}}</a>
+							</td>
+							<td data-test-name="date">{{DateUtils.AbsoluteShort .When}}</td>
+						</tr>
+					{{else}}
+						<tr>
+							<td colspan="5" class="tw-text-center">{{ctx.Locale.Tr "repo.settings.lfs_lfs_file_no_commits"}}</td>
+						</tr>
+					{{end}}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{{template "repo/settings/layout_footer" .}}

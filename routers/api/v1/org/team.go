@@ -1,0 +1,1220 @@
+// Copyright 2016 The Gogs Authors. All rights reserved.
+// Copyright 2019 The Gitea Authors. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+package org
+
+import (
+	"errors"
+	"net/http"
+
+	"forgejo.org/models"
+	activities_model "forgejo.org/models/activities"
+	"forgejo.org/models/organization"
+	"forgejo.org/models/perm"
+	access_model "forgejo.org/models/perm/access"
+	unit_model "forgejo.org/models/unit"
+	"forgejo.org/modules/log"
+	api "forgejo.org/modules/structs"
+	"forgejo.org/modules/web"
+	"forgejo.org/routers/api/v1/user"
+	"forgejo.org/routers/api/v1/utils"
+	"forgejo.org/services/context"
+	"forgejo.org/services/convert"
+	org_service "forgejo.org/services/org"
+	repo_service "forgejo.org/services/repository"
+)
+
+// ListTeams list all the teams of an organization
+func ListTeams(ctx *context.APIContext) {
+	// swagger:operation GET /orgs/{org}/teams organization orgListTeams
+	// ---
+	// summary: List an organization's teams
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: org
+	//   in: path
+	//   description: name of the organization
+	//   type: string
+	//   required: true
+	// - name: page
+	//   in: query
+	//   description: page number of results to return (1-based)
+	//   type: integer
+	// - name: limit
+	//   in: query
+	//   description: page size of results
+	//   type: integer
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/TeamList"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	teams, count, err := organization.SearchTeam(ctx, &organization.SearchTeamOptions{
+		ListOptions: utils.GetListOptions(ctx),
+		OrgID:       ctx.Org().Organization.ID,
+	})
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "LoadTeams", err)
+		return
+	}
+
+	apiTeams, err := convert.ToTeams(ctx, teams, false)
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "ConvertToTeams", err)
+		return
+	}
+
+	ctx.SetTotalCountHeader(count)
+	ctx.JSON(http.StatusOK, apiTeams)
+}
+
+// ListUserTeams list all the teams a user belongs to
+func ListUserTeams(ctx *context.APIContext) {
+	// swagger:operation GET /user/teams user userListTeams
+	// ---
+	// summary: List all the teams a user belongs to
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: page
+	//   in: query
+	//   description: page number of results to return (1-based)
+	//   type: integer
+	// - name: limit
+	//   in: query
+	//   description: page size of results
+	//   type: integer
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/TeamList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+
+	teams, count, err := organization.SearchTeam(ctx, &organization.SearchTeamOptions{
+		ListOptions: utils.GetListOptions(ctx),
+		UserID:      ctx.Doer().ID,
+	})
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "GetUserTeams", err)
+		return
+	}
+
+	apiTeams, err := convert.ToTeams(ctx, teams, true)
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "ConvertToTeams", err)
+		return
+	}
+
+	ctx.SetTotalCountHeader(count)
+	ctx.JSON(http.StatusOK, apiTeams)
+}
+
+// GetTeam api for get a team
+func GetTeam(ctx *context.APIContext) {
+	// swagger:operation GET /teams/{id} organization orgGetTeam
+	// ---
+	// summary: Get a team
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: id
+	//   in: path
+	//   description: id of the team to get
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/Team"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	apiTeam, err := convert.ToTeam(ctx, ctx.Org().Team, true)
+	if err != nil {
+		ctx.InternalServerError(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, apiTeam)
+}
+
+func attachTeamUnits(team *organization.Team, units []string) {
+	unitTypes, _ := unit_model.FindUnitTypes(units...)
+	team.Units = make([]*organization.TeamUnit, 0, len(units))
+	for _, tp := range unitTypes {
+		team.Units = append(team.Units, &organization.TeamUnit{
+			OrgID:      team.OrgID,
+			Type:       tp,
+			AccessMode: team.AccessMode,
+		})
+	}
+}
+
+func convertUnitsMap(unitsMap map[string]string) map[unit_model.Type]perm.AccessMode {
+	res := make(map[unit_model.Type]perm.AccessMode, len(unitsMap))
+	for unitKey, p := range unitsMap {
+		res[unit_model.TypeFromKey(unitKey)] = perm.ParseAccessMode(p)
+	}
+	return res
+}
+
+func attachTeamUnitsMap(team *organization.Team, unitsMap map[string]string) {
+	team.Units = make([]*organization.TeamUnit, 0, len(unitsMap))
+	for unitKey, p := range unitsMap {
+		team.Units = append(team.Units, &organization.TeamUnit{
+			OrgID:      team.OrgID,
+			Type:       unit_model.TypeFromKey(unitKey),
+			AccessMode: perm.ParseAccessMode(p),
+		})
+	}
+}
+
+func attachAdminTeamUnits(team *organization.Team) {
+	team.Units = make([]*organization.TeamUnit, 0, len(unit_model.AllRepoUnitTypes))
+	for _, ut := range unit_model.AllRepoUnitTypes {
+		up := perm.AccessModeAdmin
+		if ut == unit_model.TypeExternalTracker || ut == unit_model.TypeExternalWiki {
+			up = perm.AccessModeRead
+		}
+		team.Units = append(team.Units, &organization.TeamUnit{
+			OrgID:      team.OrgID,
+			Type:       ut,
+			AccessMode: up,
+		})
+	}
+}
+
+// CreateTeam api for create a team
+func CreateTeam(ctx *context.APIContext) {
+	// swagger:operation POST /orgs/{org}/teams organization orgCreateTeam
+	// ---
+	// summary: Create a team
+	// consumes:
+	// - application/json
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: org
+	//   in: path
+	//   description: name of the organization
+	//   type: string
+	//   required: true
+	// - name: body
+	//   in: body
+	//   schema:
+	//     "$ref": "#/definitions/CreateTeamOption"
+	// responses:
+	//   "201":
+	//     "$ref": "#/responses/Team"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+	//   "422":
+	//     "$ref": "#/responses/validationError"
+	form := web.GetForm(ctx).(*api.CreateTeamOption)
+	p := perm.ParseAccessMode(form.Permission)
+	if p < perm.AccessModeAdmin && len(form.UnitsMap) > 0 {
+		p = unit_model.MinUnitAccessMode(convertUnitsMap(form.UnitsMap))
+	}
+	team := &organization.Team{
+		OrgID:                   ctx.Org().Organization.ID,
+		Name:                    form.Name,
+		Description:             form.Description,
+		IncludesAllRepositories: form.IncludesAllRepositories,
+		CanCreateOrgRepo:        form.CanCreateOrgRepo,
+		AccessMode:              p,
+	}
+
+	if team.AccessMode < perm.AccessModeAdmin {
+		if len(form.UnitsMap) > 0 {
+			attachTeamUnitsMap(team, form.UnitsMap)
+		} else if len(form.Units) > 0 { //nolint:staticcheck
+			attachTeamUnits(team, form.Units) //nolint:staticcheck
+		} else {
+			ctx.Error(http.StatusInternalServerError, "getTeamUnits", errors.New("units permission should not be empty"))
+			return
+		}
+	} else {
+		attachAdminTeamUnits(team)
+	}
+
+	if err := models.NewTeam(ctx, team); err != nil {
+		if organization.IsErrTeamAlreadyExist(err) {
+			ctx.Error(http.StatusUnprocessableEntity, "", err)
+		} else {
+			ctx.Error(http.StatusInternalServerError, "NewTeam", err)
+		}
+		return
+	}
+
+	apiTeam, err := convert.ToTeam(ctx, team, true)
+	if err != nil {
+		ctx.InternalServerError(err)
+		return
+	}
+	ctx.JSON(http.StatusCreated, apiTeam)
+}
+
+// EditTeam api for edit a team
+func EditTeam(ctx *context.APIContext) {
+	// swagger:operation PATCH /teams/{id} organization orgEditTeam
+	// ---
+	// summary: Edit a team
+	// consumes:
+	// - application/json
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: id
+	//   in: path
+	//   description: id of the team to edit
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: body
+	//   in: body
+	//   schema:
+	//     "$ref": "#/definitions/EditTeamOption"
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/Team"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	form := web.GetForm(ctx).(*api.EditTeamOption)
+	team := ctx.Org().Team
+	if err := team.LoadUnits(ctx); err != nil {
+		ctx.InternalServerError(err)
+		return
+	}
+
+	if form.CanCreateOrgRepo != nil {
+		team.CanCreateOrgRepo = team.IsOwnerTeam() || *form.CanCreateOrgRepo
+	}
+
+	if len(form.Name) > 0 {
+		team.Name = form.Name
+	}
+
+	if form.Description != nil {
+		team.Description = *form.Description
+	}
+
+	isAuthChanged := false
+	isIncludeAllChanged := false
+	if !team.IsOwnerTeam() && len(form.Permission) != 0 {
+		// Validate permission level.
+		p := perm.ParseAccessMode(form.Permission)
+		if p < perm.AccessModeAdmin && len(form.UnitsMap) > 0 {
+			p = unit_model.MinUnitAccessMode(convertUnitsMap(form.UnitsMap))
+		}
+
+		if team.AccessMode != p {
+			isAuthChanged = true
+			team.AccessMode = p
+		}
+
+		if form.IncludesAllRepositories != nil {
+			isIncludeAllChanged = true
+			team.IncludesAllRepositories = *form.IncludesAllRepositories
+		}
+	}
+
+	if team.AccessMode < perm.AccessModeAdmin {
+		if len(form.UnitsMap) > 0 {
+			attachTeamUnitsMap(team, form.UnitsMap)
+		} else if len(form.Units) > 0 { //nolint:staticcheck
+			attachTeamUnits(team, form.Units) //nolint:staticcheck
+		}
+	} else {
+		attachAdminTeamUnits(team)
+	}
+
+	if err := models.UpdateTeam(ctx, team, isAuthChanged, isIncludeAllChanged); err != nil {
+		ctx.Error(http.StatusInternalServerError, "EditTeam", err)
+		return
+	}
+
+	apiTeam, err := convert.ToTeam(ctx, team)
+	if err != nil {
+		ctx.InternalServerError(err)
+		return
+	}
+	ctx.JSON(http.StatusOK, apiTeam)
+}
+
+// DeleteTeam api for delete a team
+func DeleteTeam(ctx *context.APIContext) {
+	// swagger:operation DELETE /teams/{id} organization orgDeleteTeam
+	// ---
+	// summary: Delete a team
+	// parameters:
+	// - name: id
+	//   in: path
+	//   description: id of the team to delete
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// responses:
+	//   "204":
+	//     description: team deleted
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	if err := models.DeleteTeam(ctx, ctx.Org().Team); err != nil {
+		ctx.Error(http.StatusInternalServerError, "DeleteTeam", err)
+		return
+	}
+	ctx.Status(http.StatusNoContent)
+}
+
+// GetTeamMembers api for get a team's members
+func GetTeamMembers(ctx *context.APIContext) {
+	// swagger:operation GET /teams/{id}/members organization orgListTeamMembers
+	// ---
+	// summary: List a team's members
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: id
+	//   in: path
+	//   description: id of the team
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: page
+	//   in: query
+	//   description: page number of results to return (1-based)
+	//   type: integer
+	// - name: limit
+	//   in: query
+	//   description: page size of results
+	//   type: integer
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/UserList"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	isMember, err := organization.IsOrganizationMember(ctx, ctx.Org().Team.OrgID, ctx.Doer().ID)
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "IsOrganizationMember", err)
+		return
+	} else if !isMember && !ctx.IsUserSiteAdmin() {
+		ctx.NotFound()
+		return
+	}
+
+	teamMembers, err := organization.GetTeamMembers(ctx, &organization.SearchMembersOptions{
+		ListOptions: utils.GetListOptions(ctx),
+		TeamID:      ctx.Org().Team.ID,
+	})
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "GetTeamMembers", err)
+		return
+	}
+
+	members := make([]*api.User, len(teamMembers))
+	for i, member := range teamMembers {
+		members[i] = convert.ToUser(ctx, member, ctx.Doer())
+	}
+
+	ctx.SetTotalCountHeader(int64(ctx.Org().Team.NumMembers))
+	ctx.JSON(http.StatusOK, members)
+}
+
+// GetTeamMember api for get a particular member of team
+func GetTeamMember(ctx *context.APIContext) {
+	// swagger:operation GET /teams/{id}/members/{username} organization orgListTeamMember
+	// ---
+	// summary: List a particular member of team
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: id
+	//   in: path
+	//   description: id of the team
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: username
+	//   in: path
+	//   description: username of the member to list
+	//   type: string
+	//   required: true
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/User"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	u := user.GetUserByParams(ctx)
+	if ctx.Written() {
+		return
+	}
+	teamID := ctx.ParamsInt64("teamid")
+	isTeamMember, err := organization.IsUserInTeams(ctx, u.ID, []int64{teamID})
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "IsUserInTeams", err)
+		return
+	} else if !isTeamMember {
+		ctx.NotFound()
+		return
+	}
+	ctx.JSON(http.StatusOK, convert.ToUser(ctx, u, ctx.Doer()))
+}
+
+// AddTeamMember api for add a member to a team
+func AddTeamMember(ctx *context.APIContext) {
+	// swagger:operation PUT /teams/{id}/members/{username} organization orgAddTeamMember
+	// ---
+	// summary: Add a team member
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: id
+	//   in: path
+	//   description: id of the team
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: username
+	//   in: path
+	//   description: username of the user to add
+	//   type: string
+	//   required: true
+	// responses:
+	//   "204":
+	//     "$ref": "#/responses/empty"
+	//   "409":
+	//     "$ref": "#/responses/forbidden"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	u := user.GetUserByParams(ctx)
+	if ctx.Written() {
+		return
+	}
+	if err := org_service.InviteOrAddTeamMember(ctx, ctx.Doer(), u, ctx.Org().Team); err != nil {
+		if organization.IsErrTeamInviteAlreadyExist(err) {
+			ctx.Error(http.StatusConflict, "InviteOrAddTeamMember", err)
+		} else {
+			ctx.Error(http.StatusInternalServerError, "InviteOrAddTeamMember", err)
+		}
+		return
+	}
+	ctx.Status(http.StatusNoContent)
+}
+
+// RemoveTeamMember api for remove one member from a team
+func RemoveTeamMember(ctx *context.APIContext) {
+	// swagger:operation DELETE /teams/{id}/members/{username} organization orgRemoveTeamMember
+	// ---
+	// summary: Remove a team member
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: id
+	//   in: path
+	//   description: id of the team
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: username
+	//   in: path
+	//   description: username of the user to remove
+	//   type: string
+	//   required: true
+	// responses:
+	//   "204":
+	//     "$ref": "#/responses/empty"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	u := user.GetUserByParams(ctx)
+	if ctx.Written() {
+		return
+	}
+
+	if err := models.RemoveTeamMember(ctx, ctx.Org().Team, u.ID); err != nil {
+		ctx.Error(http.StatusInternalServerError, "RemoveTeamMember", err)
+		return
+	}
+	ctx.Status(http.StatusNoContent)
+}
+
+// GetTeamInvitations api to list invitations to a team
+func GetTeamInvitations(ctx *context.APIContext) {
+	// swagger:operation GET /teams/{teamid}/invitations organization orgListTeamInvitations
+	// ---
+	// summary: List the invitations to a team
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: teamid
+	//   in: path
+	//   description: id of the team
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: page
+	//   in: query
+	//   description: page number of results to return (1-based)
+	//   type: integer
+	// - name: limit
+	//   in: query
+	//   description: page size of results
+	//   type: integer
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/TeamInviteList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	listTeamInvitations(ctx, &organization.SearchInvitesOptions{
+		ListOptions: utils.GetListOptions(ctx),
+		TeamID:      ctx.Org().Team.ID,
+	})
+}
+
+func listTeamInvitations(ctx *context.APIContext, options *organization.SearchInvitesOptions) {
+	teamInvitations, err := organization.GetTeamInvites(ctx, options)
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "GetTeamInvites", err)
+		return
+	}
+	err = organization.LoadUsers(ctx, teamInvitations)
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "LoadUsers", err)
+		return
+	}
+
+	invitations := make([]*api.TeamInvite, len(teamInvitations))
+	for i, invitation := range teamInvitations {
+		invitations[i] = convert.ToTeamInvite(ctx, invitation, ctx.Doer())
+	}
+
+	totalCount, err := organization.CountTeamInvites(ctx, options)
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "CountTeamInvites", err)
+		return
+	}
+	ctx.SetTotalCountHeader(totalCount)
+	ctx.JSON(http.StatusOK, invitations)
+}
+
+// getTeamInvitationWithinTeam load the team designated by the `inviteid` parameter and check that it belongs to the team `id`
+func getTeamInvitationWithinTeam(ctx *context.APIContext) *organization.TeamInvite {
+	teamID := ctx.ParamsInt64("teamid")
+	inviteID := ctx.ParamsInt64("inviteid")
+	invite, err := organization.GetInviteInTeamByID(ctx, inviteID, teamID)
+	if err != nil {
+		if organization.IsErrTeamInviteNotFound(err) {
+			ctx.NotFound("getTeamInvitationWithinTeam")
+		} else {
+			ctx.Error(http.StatusInternalServerError, "GetInviteByID", err)
+		}
+		return nil
+	}
+	err = invite.LoadUsers(ctx)
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "LoadUsers", err)
+		return nil
+	}
+	return invite
+}
+
+// GetTeamInvitation API to get a particular team invitation
+func GetTeamInvitation(ctx *context.APIContext) {
+	// swagger:operation GET /teams/{teamid}/invitations/{inviteid} organization orgGetTeamInvitation
+	// ---
+	// summary: Get an invitation to a team
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: teamid
+	//   in: path
+	//   description: id of the team
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: inviteid
+	//   in: path
+	//   description: id of the invitation
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/TeamInvite"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	invite := getTeamInvitationWithinTeam(ctx)
+	if ctx.Written() {
+		return
+	}
+	ctx.JSON(http.StatusOK, convert.ToTeamInvite(ctx, invite, ctx.Doer()))
+}
+
+// RemoveTeamInvitation api to remove an invitation to a team
+func RemoveTeamInvitation(ctx *context.APIContext) {
+	// swagger:operation DELETE /teams/{teamid}/invitations/{inviteid} organization orgRemoveTeamInvitation
+	// ---
+	// summary: Remove a team invitation
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: teamid
+	//   in: path
+	//   description: id of the team
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: inviteid
+	//   in: path
+	//   description: id of the invitation
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// responses:
+	//   "204":
+	//     "$ref": "#/responses/empty"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	// check that the invite exists before deleting it
+	invite := getTeamInvitationWithinTeam(ctx)
+	if ctx.Written() {
+		return
+	}
+
+	if err := organization.RemoveInviteByID(ctx, invite.ID, invite.TeamID); err != nil {
+		ctx.Error(http.StatusInternalServerError, "RemoveInviteByID", err)
+		return
+	}
+	ctx.Status(http.StatusNoContent)
+}
+
+// GetTeamRepos api for get a team's repos
+func GetTeamRepos(ctx *context.APIContext) {
+	// swagger:operation GET /teams/{id}/repos organization orgListTeamRepos
+	// ---
+	// summary: List a team's repos
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: id
+	//   in: path
+	//   description: id of the team
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: page
+	//   in: query
+	//   description: page number of results to return (1-based)
+	//   type: integer
+	// - name: limit
+	//   in: query
+	//   description: page size of results
+	//   type: integer
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/RepositoryList"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	team := ctx.Org().Team
+	teamRepos, err := organization.GetTeamRepositories(ctx, &organization.SearchTeamRepoOptions{
+		ListOptions:          utils.GetListOptions(ctx),
+		TeamID:               team.ID,
+		AuthorizationReducer: ctx.Reducer(),
+	})
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "GetTeamRepos", err)
+		return
+	}
+	repos := make([]*api.Repository, len(teamRepos))
+	for i, repo := range teamRepos {
+		permission, err := access_model.GetUserRepoPermissionWithReducer(ctx, repo, ctx.Doer(), ctx.Reducer())
+		if err != nil {
+			ctx.Error(http.StatusInternalServerError, "GetUserRepoPermissionWithReducer", err)
+			return
+		} else if !permission.HasAccess() {
+			// It shouldn't happen that a repo is returned from GetTeamRepositories which we have no access to at all.
+			// Due to the pagination of the API it doesn't make sense to skip it, as we wouldn't be giving the right
+			// number of results back to the API consumer.
+			ctx.Error(http.StatusInternalServerError, "InvalidAuthorizationReducer", "Repository was available from GetTeamRepositories, but not readable.")
+			return
+		}
+		repos[i] = convert.ToRepo(ctx, repo, permission)
+	}
+	ctx.SetTotalCountHeader(int64(team.NumRepos))
+	ctx.JSON(http.StatusOK, repos)
+}
+
+// GetTeamRepo api for get a particular repo of team
+func GetTeamRepo(ctx *context.APIContext) {
+	// swagger:operation GET /teams/{id}/repos/{org}/{repo} organization orgListTeamRepo
+	// ---
+	// summary: List a particular repo of team
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: id
+	//   in: path
+	//   description: id of the team
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: org
+	//   in: path
+	//   description: organization that owns the repo to list
+	//   type: string
+	//   required: true
+	// - name: repo
+	//   in: path
+	//   description: name of the repo to list
+	//   type: string
+	//   required: true
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/Repository"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	repo := ctx.Repo().Repository
+
+	if !organization.HasTeamRepo(ctx, ctx.Org().Team.OrgID, ctx.Org().Team.ID, repo.ID) {
+		ctx.NotFound()
+		return
+	}
+
+	permission, err := access_model.GetUserRepoPermissionWithReducer(ctx, repo, ctx.Doer(), ctx.Reducer())
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "GetUserRepoPermissionWithReducer", err)
+		return
+	}
+	if !permission.HasAccess() {
+		ctx.NotFound()
+		return
+	}
+
+	ctx.JSON(http.StatusOK, convert.ToRepo(ctx, repo, permission))
+}
+
+// AddTeamRepository api for adding a repository to a team
+func AddTeamRepository(ctx *context.APIContext) {
+	// swagger:operation PUT /teams/{id}/repos/{org}/{repo} organization orgAddTeamRepository
+	// ---
+	// summary: Add a repository to a team
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: id
+	//   in: path
+	//   description: id of the team
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: org
+	//   in: path
+	//   description: organization that owns the repo to add
+	//   type: string
+	//   required: true
+	// - name: repo
+	//   in: path
+	//   description: name of the repo to add
+	//   type: string
+	//   required: true
+	// responses:
+	//   "204":
+	//     "$ref": "#/responses/empty"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	repo := ctx.Repo().Repository
+
+	if err := org_service.TeamAddRepository(ctx, ctx.Org().Team, repo); err != nil {
+		ctx.Error(http.StatusInternalServerError, "TeamAddRepository", err)
+		return
+	}
+	ctx.Status(http.StatusNoContent)
+}
+
+// RemoveTeamRepository api for removing a repository from a team
+func RemoveTeamRepository(ctx *context.APIContext) {
+	// swagger:operation DELETE /teams/{id}/repos/{org}/{repo} organization orgRemoveTeamRepository
+	// ---
+	// summary: Remove a repository from a team
+	// description: This does not delete the repository, it only removes the
+	//              repository from the team.
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: id
+	//   in: path
+	//   description: id of the team
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: org
+	//   in: path
+	//   description: organization that owns the repo to remove
+	//   type: string
+	//   required: true
+	// - name: repo
+	//   in: path
+	//   description: name of the repo to remove
+	//   type: string
+	//   required: true
+	// responses:
+	//   "204":
+	//     "$ref": "#/responses/empty"
+	//   "403":
+	//     "$ref": "#/responses/forbidden"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	repo := ctx.Repo().Repository
+
+	if err := repo_service.RemoveRepositoryFromTeam(ctx, ctx.Org().Team, repo.ID); err != nil {
+		ctx.Error(http.StatusInternalServerError, "RemoveRepository", err)
+		return
+	}
+	ctx.Status(http.StatusNoContent)
+}
+
+// SearchTeam api for searching teams
+func SearchTeam(ctx *context.APIContext) {
+	// swagger:operation GET /orgs/{org}/teams/search organization teamSearch
+	// ---
+	// summary: Search for teams within an organization
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: org
+	//   in: path
+	//   description: name of the organization
+	//   type: string
+	//   required: true
+	// - name: q
+	//   in: query
+	//   description: keywords to search
+	//   type: string
+	// - name: include_desc
+	//   in: query
+	//   description: include search within team description (defaults to true)
+	//   type: boolean
+	// - name: page
+	//   in: query
+	//   description: page number of results to return (1-based)
+	//   type: integer
+	// - name: limit
+	//   in: query
+	//   description: page size of results
+	//   type: integer
+	// responses:
+	//   "200":
+	//     description: "SearchResults of a successful search"
+	//     schema:
+	//       type: object
+	//       title: "TeamSearchResults"
+	//       properties:
+	//         ok:
+	//           type: boolean
+	//         data:
+	//           type: array
+	//           items:
+	//             "$ref": "#/definitions/Team"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	listOptions := utils.GetListOptions(ctx)
+
+	opts := &organization.SearchTeamOptions{
+		Keyword:     ctx.FormTrim("q"),
+		OrgID:       ctx.Org().Organization.ID,
+		IncludeDesc: ctx.FormString("include_desc") == "" || ctx.FormBool("include_desc"),
+		ListOptions: listOptions,
+	}
+
+	// Only admin is allowed to search for all teams
+	if !ctx.IsUserSiteAdmin() {
+		opts.UserID = ctx.Doer().ID
+	}
+
+	teams, maxResults, err := organization.SearchTeam(ctx, opts)
+	if err != nil {
+		log.Error("SearchTeam failed: %v", err)
+		ctx.JSON(http.StatusInternalServerError, map[string]any{
+			"ok":    false,
+			"error": "SearchTeam internal failure",
+		})
+		return
+	}
+
+	apiTeams, err := convert.ToTeams(ctx, teams, false)
+	if err != nil {
+		ctx.InternalServerError(err)
+		return
+	}
+
+	ctx.SetLinkHeader(int(maxResults), listOptions.PageSize)
+	ctx.SetTotalCountHeader(maxResults)
+	ctx.JSON(http.StatusOK, map[string]any{
+		"ok":   true,
+		"data": apiTeams,
+	})
+}
+
+func ListTeamActivityFeeds(ctx *context.APIContext) {
+	// swagger:operation GET /teams/{id}/activities/feeds organization orgListTeamActivityFeeds
+	// ---
+	// summary: List a team's activity feeds
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: id
+	//   in: path
+	//   description: id of the team
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: date
+	//   in: query
+	//   description: the date of the activities to be found
+	//   type: string
+	//   format: date
+	// - name: page
+	//   in: query
+	//   description: page number of results to return (1-based)
+	//   type: integer
+	// - name: limit
+	//   in: query
+	//   description: page size of results
+	//   type: integer
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/ActivityFeedsList"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	listOptions := utils.GetListOptions(ctx)
+
+	opts := activities_model.GetFeedsOptions{
+		RequestedTeam:  ctx.Org().Team,
+		Actor:          ctx.Doer(),
+		IncludePrivate: true,
+		Date:           ctx.FormString("date"),
+		ListOptions:    listOptions,
+	}
+
+	feeds, count, err := activities_model.GetFeeds(ctx, opts)
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "GetFeeds", err)
+		return
+	}
+	ctx.SetTotalCountHeader(count)
+
+	ctx.JSON(http.StatusOK, convert.ToActivities(ctx, feeds, ctx.Doer()))
+}
+
+// ListMyOrgs list all my team invitations
+func ListMyTeamInvitations(ctx *context.APIContext) {
+	// swagger:operation GET /user/team_invitations organization orgListCurrentUserTeamInvitations
+	// ---
+	// summary: List the current user's team invitations
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: page
+	//   in: query
+	//   description: page number of results to return (1-based)
+	//   type: integer
+	// - name: limit
+	//   in: query
+	//   description: page size of results
+	//   type: integer
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/TeamInviteList"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+
+	listTeamInvitations(ctx, &organization.SearchInvitesOptions{
+		InvitedID: ctx.Doer().ID,
+	})
+}
+
+func getMyTeamInvitation(ctx *context.APIContext) *organization.TeamInvite {
+	inviteID := ctx.ParamsInt64("inviteid")
+	invite, err := organization.GetInviteForUserByID(ctx, inviteID, ctx.Doer().ID)
+	if err != nil {
+		if organization.IsErrTeamInviteNotFound(err) {
+			ctx.NotFound("GetInviteByID")
+		} else {
+			ctx.Error(http.StatusInternalServerError, "GetInviteByID", err)
+		}
+		return nil
+	}
+	// check that it is not expired
+	if invite.IsExpired() {
+		ctx.NotFound("getMyTeamInvite")
+		return nil
+	}
+	err = invite.LoadUsers(ctx)
+	if err != nil {
+		ctx.Error(http.StatusInternalServerError, "LoadUsers", err)
+		return nil
+	}
+	return invite
+}
+
+// GetMyTeamInvitation API to get a team invitation addressed to the current user
+func GetMyTeamInvitation(ctx *context.APIContext) {
+	// swagger:operation GET /user/team_invitations/{inviteid} organization orgGetMyTeamInvitation
+	// ---
+	// summary: Get an invitation to a team for the current user
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: inviteid
+	//   in: path
+	//   description: id of the invitation
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// responses:
+	//   "200":
+	//     "$ref": "#/responses/TeamInvite"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+	invite := getMyTeamInvitation(ctx)
+	if ctx.Written() {
+		return
+	}
+	ctx.JSON(http.StatusOK, convert.ToTeamInvite(ctx, invite, ctx.Doer()))
+}
+
+// AcceptMyTeamInvitation API to accept an invitation addressed to the current user
+func AcceptMyTeamInvitation(ctx *context.APIContext) {
+	// swagger:operation POST /user/team_invitations/{inviteid}/accept organization orgAcceptMyTeamInvitation
+	// ---
+	// summary: Accept an invitation to a team for the current user
+	// consumes:
+	// - application/json
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: inviteid
+	//   in: path
+	//   description: id of the invitation
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// - name: body
+	//   in: body
+	//   schema:
+	//     "$ref": "#/definitions/AcceptTeamInviteOptions"
+	// responses:
+	//   "204":
+	//     "$ref": "#/responses/TeamInvite"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+	//   "406":
+	//     "$ref": "#/responses/notAcceptable"
+	//   "422":
+	//     "$ref": "#/responses/validationError"
+
+	invite := getMyTeamInvitation(ctx)
+	if ctx.Written() {
+		return
+	}
+	team, err := organization.GetTeamByID(ctx, invite.TeamID)
+	if err != nil {
+		ctx.ServerError("GetTeamByID", err)
+		return
+	}
+	form := web.GetForm(ctx).(*api.AcceptTeamInviteOptions)
+
+	err = org_service.AcceptInvite(ctx, team, invite, ctx.Doer(), form.HideMembership)
+	if err != nil {
+		if organization.IsErrTeamInviteNotFound(err) {
+			ctx.NotFound("AcceptInvite")
+		} else if organization.IsErrTeamInviteExpired(err) {
+			ctx.Error(http.StatusNotAcceptable, "AcceptInvite", err)
+		} else {
+			ctx.ServerError("AcceptInvite", err)
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, convert.ToTeamInvite(ctx, invite, ctx.Doer()))
+}
+
+// DeclineMyTeamInvitation API to decline an invitation addressed to the current user
+func DeclineMyTeamInvitation(ctx *context.APIContext) {
+	// swagger:operation POST /user/team_invitations/{inviteid}/decline organization orgDeclineMyTeamInvitation
+	// ---
+	// summary: Decline an invitation to a team for the current user
+	// consumes:
+	// - application/json
+	// produces:
+	// - application/json
+	// parameters:
+	// - name: inviteid
+	//   in: path
+	//   description: id of the invitation
+	//   type: integer
+	//   format: int64
+	//   required: true
+	// responses:
+	//   "204":
+	//     "$ref": "#/responses/TeamInvite"
+	//   "401":
+	//     "$ref": "#/responses/unauthorized"
+	//   "404":
+	//     "$ref": "#/responses/notFound"
+	//   "406":
+	//     "$ref": "#/responses/notAcceptable"
+	//   "422":
+	//     "$ref": "#/responses/validationError"
+
+	invite := getMyTeamInvitation(ctx)
+	if ctx.Written() {
+		return
+	}
+
+	err := org_service.DeclineInvite(ctx, invite)
+	if err != nil {
+		if organization.IsErrTeamInviteNotFound(err) {
+			ctx.NotFound("DeclineInvite")
+		} else if organization.IsErrTeamInviteExpired(err) {
+			ctx.Error(http.StatusNotAcceptable, "DeclineInvite", err)
+		} else {
+			ctx.ServerError("DeclineInvite", err)
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, convert.ToTeamInvite(ctx, invite, ctx.Doer()))
+}

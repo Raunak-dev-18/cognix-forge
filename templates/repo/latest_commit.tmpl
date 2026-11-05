@@ -1,0 +1,33 @@
+{{if not .LatestCommit}}
+	<div class="ui active tiny slow centered inline">…</div>
+{{else}}
+	{{if .LatestCommitUser}}
+		{{ctx.AvatarUtils.Avatar .LatestCommitUser 24 "tw-mr-2"}}
+		{{if and .LatestCommitUser.FullName DefaultShowFullName}}
+			<a class="muted author-wrapper" title="{{.LatestCommitUser.FullName}}" href="{{.LatestCommitUser.HomeLink}}"><strong>{{.LatestCommitUser.FullName}}</strong></a>
+		{{else}}
+			<a class="muted author-wrapper" title="{{if .LatestCommit.Author}}{{.LatestCommit.Author.Name}}{{else}}{{.LatestCommitUser.Name}}{{end}}" href="{{.LatestCommitUser.HomeLink}}"><strong>{{if .LatestCommit.Author}}{{.LatestCommit.Author.Name}}{{else}}{{.LatestCommitUser.Name}}{{end}}</strong></a>
+		{{end}}
+	{{else}}
+		{{if .LatestCommit.Author}}
+			{{ctx.AvatarUtils.AvatarByEmail .LatestCommit.Author.Email .LatestCommit.Author.Name 24 "tw-mr-2"}}
+			<span class="author-wrapper" title="{{.LatestCommit.Author.Name}}"><strong>{{.LatestCommit.Author.Name}}</strong></span>
+		{{end}}
+	{{end}}
+	{{template "repo/shabox" (dict
+		"sha1" .LatestCommit.ID.String
+		"commitLink" (printf "%s/commit/%s" .RepoLink (.LatestCommit.ID.String|PathEscape))
+		"signature" .LatestCommit.Signature
+		"verification" .LatestCommitVerification
+	)}}
+	{{template "repo/commit_statuses" dict "Status" .LatestCommitStatus "Statuses" .LatestCommitStatuses}}
+	{{$commitLink:= printf "%s/commit/%s" .RepoLink (PathEscape .LatestCommit.ID.String)}}
+	<span class="grey commit-summary" title="{{.LatestCommit.Summary}}"><span class="message-wrapper">{{RenderCommitMessageLinkSubject $.Context .LatestCommit.Message $commitLink ($.Repository.ComposeMetas ctx)}}</span>
+	{{if IsMultilineCommitMessage .LatestCommit.Message}}
+	<details class="commit-body-toggle">
+		<summary class="ui button ellipsis-button" aria-label="{{ctx.Locale.Tr "repo.toggle_full_commit_message"}}" data-tooltip-from-label>...</summary>
+		<pre class="commit-body">{{RenderCommitBody $.Context .LatestCommit.Message ($.Repository.ComposeMetas ctx)}}</pre>
+	</details>
+	{{end}}
+	</span>
+{{end}}

@@ -1,0 +1,22 @@
+/* Copyright 2026 The Forgejo Authors. All rights reserved.
+SPDX-License-Identifier: GPL-3.0-or-later */
+
+.service-message-content {
+  margin: 0 0.5rem !important;
+  padding: 0.5rem !important;
+  height: calc(100vh - 450px);
+  min-height: 60vh;
+  flex: 0 0 auto;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.service-message-header {
+  margin: 0 0.5rem !important;
+  padding: 0.5rem !important;
+}
+
+.service-message-content h1 {
+  padding-bottom: 2rem;
+}

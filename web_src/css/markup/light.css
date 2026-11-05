@@ -1,0 +1,12 @@
+.markup [src$="#gh-dark-mode-only"],
+.markup [src$="#dark-mode-only"],
+.markup [href$="#gh-dark-mode-only"],
+.markup [href$="#dark-mode-only"] {
+  display: none;
+}
+
+/* Some branded SVGs define their own light-theme color variants through this variable. */
+svg.brand-color path,
+svg.brand-color rect {
+  fill: var(--brand-light-fill, revert-rule);
+}

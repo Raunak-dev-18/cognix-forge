@@ -1,0 +1,276 @@
+/*
+Cognix brand layer for Forgejo.
+Imported by theme-cognix-light.css and theme-cognix-dark.css, after index.css,
+so component overrides win the cascade at equal specificity.
+All colors come from theme variables so both tones share this layer.
+*/
+
+:root {
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ---------- Buttons ----------
+   Raised surfaces, 8px radius, Geist Medium text.
+   No lift on hover; press scales to 0.97 for 100ms. */
+
+.ui.button,
+.button,
+.btn {
+  border-radius: var(--border-radius);
+  font-weight: var(--font-weight-medium);
+  transition:
+    background-color 150ms var(--ease),
+    border-color 150ms var(--ease),
+    color 150ms var(--ease),
+    box-shadow 150ms var(--ease),
+    transform 100ms var(--ease) !important;
+}
+
+.ui.button:hover,
+.button:hover,
+.btn:hover {
+  transform: none;
+}
+
+.ui.button:active,
+.button:active,
+.btn:active {
+  transform: scale(0.97) !important;
+  transition-duration: 100ms;
+}
+
+/* Primary: deep green surface with a dotted Cognix Green glow
+   on its right edge that widens on hover. */
+
+.ui.primary.button,
+.ui.primary.buttons .button,
+.button.primary {
+  position: relative;
+  border: 1px solid var(--color-primary-dark-2);
+}
+
+.ui.primary.button::after,
+.ui.primary.buttons .button::after,
+.button.primary::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  inset-inline-end: 2px;
+  width: 2px;
+  background-image: repeating-linear-gradient(to bottom, var(--cognix-green) 0 3px, transparent 3px 6px);
+  border-radius: 1px;
+  opacity: 0;
+  transition:
+    opacity 150ms var(--ease),
+    width 150ms var(--ease);
+}
+
+.ui.primary.button:hover::after,
+.ui.primary.button:focus-visible::after,
+.ui.primary.buttons .button:hover::after,
+.button.primary:hover::after,
+.button.primary:focus-visible::after {
+  opacity: 1;
+  width: 3px;
+}
+
+/* Outline / basic: a green glow slides in from the bottom left. */
+
+.ui.basic.button:hover,
+.ui.basic.buttons .button:hover,
+.button.secondary:hover,
+.btn:hover {
+  background-image: radial-gradient(140% 140% at 0% 100%, var(--color-primary-alpha-20), transparent 55%);
+}
+
+/* Danger buttons keep their semantics, just inherit the shape. */
+
+.ui.danger.button,
+.ui.danger.buttons .button,
+.ui.red.button,
+.ui.red.buttons .button {
+  border-radius: var(--border-radius);
+}
+
+/* ---------- Inputs ----------
+   White fields on trays, 8px radius, green focus ring. */
+
+input,
+textarea,
+.ui.input > input,
+.ui.input input,
+.ui.action.input > input,
+.ui.selection.dropdown {
+  border-radius: var(--border-radius);
+}
+
+input:focus,
+input:focus-visible,
+textarea:focus,
+.ui.input > input:focus,
+.ui.input.focus > input,
+.ui.input:focus-within > input {
+  box-shadow: 0 0 0 3px var(--color-primary-alpha-20);
+}
+
+/* ---------- Trays and segments ----------
+   Surfaces are physical: a soft inner highlight on top
+   and a hairline outer ring, 8px working radius. */
+
+.ui.segment,
+.ui.grid.segment,
+.ui.segments {
+  border-radius: var(--border-radius);
+}
+
+.ui.segments > .segment {
+  border-radius: 0;
+}
+
+.ui.segments:not(.horizontal) > .segment:first-child {
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.ui.segments:not(.horizontal) > .segment:last-child {
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+.ui.segments:not(.horizontal) > .segment:only-child,
+.ui.segments:not(.horizontal) > .segment:has(~ .tw-hidden) {
+  border-radius: var(--border-radius);
+}
+
+.ui.horizontal.segments {
+  border-radius: var(--border-radius);
+}
+
+.ui.horizontal.segments > .segment:first-child {
+  border-radius: var(--border-radius) 0 0 var(--border-radius);
+}
+
+.ui.horizontal.segments > .segment:last-child {
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+.ui.attached.segment:has(+ .ui[class*="top attached"].header),
+.ui.attached.segment:last-child {
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+.ui[class*="top attached"].segment {
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.ui.segment[class*="bottom attached"] {
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+/* Standalone segments are trays: inner highlight on top. */
+
+.ui.segment:not(.attached):not(.padded):not(.basic) {
+  box-shadow: inset 0 1px 0 var(--cognix-inner-highlight);
+}
+
+/* ---------- Cards ----------
+   White, 14px radius, hairline ring, soft neutral shadow. */
+
+.ui.card,
+.ui.cards > .card {
+  --border-radius: 14px;
+  background: var(--color-card);
+  border: 1px solid var(--color-light-border);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px var(--cognix-shadow-card);
+}
+
+.ui.card > .ui.button,
+.ui.cards > .card > .ui.button,
+.ui.card .ui.button,
+.ui.cards .card .ui.button {
+  --border-radius: 8px;
+}
+
+/* ---------- Labels ---------- */
+
+.ui.label {
+  border-radius: 6px;
+}
+
+/* ---------- Modals and dialogs ---------- */
+
+.ui.modal,
+dialog.modal {
+  border-radius: 20px;
+  box-shadow: 0 24px 64px var(--color-shadow) !important;
+}
+
+.ui.modal > :first-child {
+  border-start-start-radius: 20px;
+  border-start-end-radius: 20px;
+}
+
+.ui.modal > :last-child {
+  border-end-start-radius: 20px;
+  border-end-end-radius: 20px;
+}
+
+dialog.modal {
+  border: 1px solid var(--color-light-border);
+}
+
+dialog.modal header {
+  border-start-start-radius: 20px;
+  border-start-end-radius: 20px;
+}
+
+/* ---------- Dropdowns, popups, toasts ---------- */
+
+.ui.dropdown .menu {
+  border-radius: var(--border-radius);
+  box-shadow: 0 8px 24px var(--color-shadow);
+}
+
+:root .dialog-dropdown {
+  --dropdown-box-shadow: 0 8px 24px var(--color-shadow);
+}
+
+.tippy-box {
+  box-shadow: 0 8px 24px var(--color-shadow) !important;
+}
+
+.toast {
+  box-shadow: 0 8px 24px var(--color-shadow) !important;
+}
+
+/* ---------- Navbar ----------
+   Ground-toned bar with hairline rule and pill-shaped item hovers. */
+
+#navbar {
+  border-bottom: 1px solid var(--color-light-border);
+}
+
+#navbar .item {
+  border-radius: 6px;
+}
+
+/* ---------- Footer ---------- */
+
+.page-footer {
+  border-top: 1px solid var(--color-light-border);
+}
+
+.page-footer .right-links > a {
+  border-inline-start-color: var(--color-light-border);
+}
+
+/* ---------- Tabs ----------
+   The active tab carries a green underline. */
+
+.ui.tabular.menu .active.item,
+.ui.tabular.menu .active.item:hover,
+.ui.secondary.pointing.menu .active.item,
+.ui.secondary.pointing.menu .active.item:hover,
+.ui.secondary.pointing.menu .active.item:focus {
+  box-shadow: inset 0 -2px 0 var(--color-primary);
+}
