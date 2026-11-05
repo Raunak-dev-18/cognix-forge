@@ -149,7 +149,7 @@ func serveInstall(_ context.Context, ctx *cli.Command) error {
 		}
 	}
 	c := install.Routes()
-	err := listen(c, false)
+	err := listen(c, false, false)
 	if err != nil {
 		log.Critical("Unable to open listener for installer. Is Forgejo already running?")
 		graceful.GetManager().DoGracefulShutdown()
@@ -219,7 +219,7 @@ func serveInstalled(_ context.Context, ctx *cli.Command) error {
 
 	// Set up Chi routes
 	webRoutes := routers.NormalRoutes()
-	err := listen(webRoutes, true)
+	err := listen(webRoutes, true, true)
 	if err != nil {
 		log.Critical("Unable to open listener for web server: %s", err.Error())
 		graceful.GetManager().DoGracefulShutdown()
@@ -312,7 +312,7 @@ func setPort(port string) error {
 	return nil
 }
 
-func listen(m http.Handler, handleRedirector bool) error {
+func listen(m http.Handler, handleRedirector bool, runInternalListener bool) error {
 	listenAddr := setting.HTTPAddr
 	if setting.Protocol != setting.HTTPUnix && setting.Protocol != setting.FCGIUnix {
 		listenAddr = net.JoinHostPort(listenAddr, setting.HTTPPort)
@@ -342,15 +342,17 @@ func listen(m http.Handler, handleRedirector bool) error {
 	}
 
 	var serverGroup errgroup.Group
-	serverGroup.Go(func() error {
-		internalRoutes := routers.InternalRoutes()
-		err := runHTTP("unix", setting.InternalListenerPath, "Internal Web", internalRoutes, false)
-		if err != nil {
-			log.Critical("Failed to start internal server: %e", err)
-		}
+	if runInternalListener {
+		serverGroup.Go(func() error {
+			internalRoutes := routers.InternalRoutes()
+			err := runHTTP("unix", setting.InternalListenerPath, "Internal Web", internalRoutes, false)
+			if err != nil {
+				log.Critical("Failed to start internal server: %e", err)
+			}
 
-		return err
-	})
+			return err
+		})
+	}
 
 	serverGroup.Go(func() error {
 		var err error
