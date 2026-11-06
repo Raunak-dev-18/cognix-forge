@@ -3,7 +3,10 @@
 	{{template "repo/header" .}}
 	<div class="ui container {{if .IsBlame}}fluid padded{{end}}">
 		{{template "base/alert" .}}
-		{{if and (not .HideRepoInfo) (not .IsBlame)}}
+		{{$n := len .TreeNames}}
+		{{$l := Eval $n "-" 1}}
+		{{$isHomepage := (eq $n 0)}}
+		{{if and (not .HideRepoInfo) (not .IsBlame) (not $isHomepage)}}
 		<div class="repo-description">
 			<div id="repo-desc" class="tw-break-anywhere tw-text-16">
 				{{$description := .Repository.DescriptionHTML $.Context}}
@@ -49,9 +52,7 @@
 			</div>
 		{{end}}
 		{{template "repo/sub_menu" .}}
-		{{$n := len .TreeNames}}
-		{{$l := Eval $n "-" 1}}
-		{{$isHomepage := (eq $n 0)}}
+		{{if $isHomepage}}<div class="repo-home-grid"><div class="repo-home-main">{{end}}
 		<div class="repo-button-row">
 			<div class="button-sequence tw-gap-y-2">
 				{{template "repo/branch_dropdown" dict "root" .}}
@@ -169,6 +170,35 @@
 				</div>
 			{{end}}
 			{{template "repo/view_list" .}}
+		{{end}}
+		{{if $isHomepage}}
+		</div>{{/* repo-home-main */}}
+		{{if not .HideRepoInfo}}
+		<aside class="repo-home-sidebar">
+			<h3 class="repo-home-sidebar-title">{{ctx.Locale.Tr "repo.about"}}</h3>
+			<div id="repo-desc" class="tw-break-anywhere">
+				{{$description := .Repository.DescriptionHTML $.Context}}
+				{{if $description}}<span class="description">{{$description | RenderCodeBlock}}</span>{{else}}<span class="no-description text-italic">{{ctx.Locale.Tr "repo.no_desc"}}</span>{{end}}
+				{{if .Repository.Website}}<a class="link" href="{{.Repository.Website}}">{{.Repository.Website}}</a>{{end}}
+			</div>
+			{{if or .Topics (and .Permission.IsAdmin (not .Repository.IsArchived))}}
+			<div class="repo-topics tw-my-2" id="repo-topics">
+				{{range .Topics}}
+					<a class="repo-topic ui label" href="{{AppSubUrl}}/explore/repos?q={{.}}&topic=1">{{.}}</a>
+				{{end}}
+				{{if and .Permission.IsAdmin (not .Repository.IsArchived)}}
+					<button id="manage_topic" class="btn interact-fg tw-text-12">{{ctx.Locale.Tr "repo.topic.manage_topics"}}</button>
+				{{end}}
+			</div>
+			{{end}}
+			<div class="repo-home-stats">
+				<a class="muted" href="{{.RepoLink}}/stars">{{svg "octicon-star" 16}} <strong>{{.Repository.NumStars}}</strong> {{ctx.Locale.Tr "repo.stars"}}</a>
+				<a class="muted" href="{{.RepoLink}}/watchers">{{svg "octicon-eye" 16}} <strong>{{.Repository.NumWatches}}</strong> {{ctx.Locale.Tr "repo.watchers"}}</a>
+				<a class="muted" href="{{.RepoLink}}/forks">{{svg "octicon-repo-forked" 16}} <strong>{{.Repository.NumForks}}</strong> {{ctx.Locale.Tr "repo.forks"}}</a>
+			</div>
+		</aside>
+		{{end}}
+		</div>{{/* repo-home-grid */}}
 		{{end}}
 	</div>
 </div>

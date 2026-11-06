@@ -17,8 +17,8 @@
 	<link rel="alternate" type="application/atom+xml" title="" href="{{.FeedURL}}.atom">
 	<link rel="alternate" type="application/rss+xml" title="" href="{{.FeedURL}}.rss">
 {{end}}
-	<link rel="icon" href="{{AssetUrlPrefix}}/img/favicon.svg" type="image/svg+xml">
-	<link rel="alternate icon" href="{{AssetUrlPrefix}}/img/favicon.png" type="image/png">
+	<link rel="icon" href="{{AssetUrlPrefix}}/img/favicon.svg?v={{AssetVersion}}" type="image/svg+xml">
+	<link rel="alternate icon" href="{{AssetUrlPrefix}}/img/favicon.png?v={{AssetVersion}}" type="image/png">
 {{if and FederationEnabled .PageIsUserProfile .ContextUser .ContextUser.IsIndividual}}
 	<link rel="alternate" type="application/activity+json" href="{{.ContextUser.APActorID}}">
 {{end}}

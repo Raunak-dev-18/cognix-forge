@@ -201,7 +201,7 @@
   --hue-blue: 247deg;
 
   /* target-based colors (GitHub-style: warm canvas, white panels, ink navbar) */
-  --color-body: #f4f4f2;
+  --color-body: #fafaf8;
   --color-box-header: #f2f2f0;
   --color-box-body: #ffffff;
   --color-box-body-highlight: #dfede3;
@@ -246,7 +246,7 @@
   --color-tooltip-bg: #121212f0;
   --color-nav-bg: #121212;
   --color-nav-hover-bg: #2c2c2a;
-  --color-secondary-nav-bg: #f4f4f2;
+  --color-secondary-nav-bg: #f2f2f0;
   --color-label-text: var(--color-text);
   --color-label-bg: #12121214;
   --color-label-hover-bg: #12121226;
