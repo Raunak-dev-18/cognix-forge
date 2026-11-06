@@ -189,7 +189,7 @@ func TestCommitListActions(t *testing.T) {
 func TestTitleDisplayName(t *testing.T) {
 	session := emptyTestSession(t)
 	title := GetHTMLTitle(t, session, "/")
-	assert.Equal(t, "Forgejo: Beyond coding. We Forge.", title)
+	assert.Equal(t, "GitCode: Branch boldly. Merge with calm.", title)
 }
 
 func TestHomeDisplayName(t *testing.T) {
@@ -197,7 +197,7 @@ func TestHomeDisplayName(t *testing.T) {
 	req := NewRequest(t, "GET", "/")
 	resp := session.MakeRequest(t, req, http.StatusOK)
 	htmlDoc := NewHTMLParser(t, resp.Body)
-	assert.Equal(t, "Forgejo: Beyond coding. We Forge.", strings.TrimSpace(htmlDoc.Find("h1.title").Text()))
+	assert.Equal(t, "GitCode: Branch boldly. Merge with calm.", strings.TrimSpace(htmlDoc.Find("h1.title").Text()))
 }
 
 func TestOpenGraphDisplayName(t *testing.T) {
@@ -206,7 +206,7 @@ func TestOpenGraphDisplayName(t *testing.T) {
 	resp := session.MakeRequest(t, req, http.StatusOK)
 	htmlDoc := NewHTMLParser(t, resp.Body)
 	ogTitle, _ := htmlDoc.Find("meta[property='og:title']").Attr("content")
-	assert.Equal(t, "Forgejo: Beyond coding. We Forge.", ogTitle)
+	assert.Equal(t, "GitCode: Branch boldly. Merge with calm.", ogTitle)
 	ogSiteName, _ := htmlDoc.Find("meta[property='og:site_name']").Attr("content")
-	assert.Equal(t, "Forgejo: Beyond coding. We Forge.", ogSiteName)
+	assert.Equal(t, "GitCode: Branch boldly. Merge with calm.", ogSiteName)
 }

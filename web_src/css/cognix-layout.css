@@ -1,0 +1,461 @@
+/*
+GitCode layout fixes: one shared page width, GitHub-style repository header and the
+signed-in dashboard. Imported by the Cognix themes after cognix-pages.css.
+*/
+
+/* ===================================================================
+   One page width everywhere.
+   Fomantic gives .ui.container fixed widths per breakpoint (1127/933/723px)
+   while page content used min(100% - 32px, 1280px), so the navbar, the tab bar
+   and the content never lined up. Everything now shares the same box.
+   =================================================================== */
+
+:root {
+  --cx-page-max: 1280px;
+  --cx-page-gutter: 16px;
+}
+
+.ui.container:not(.fluid),
+.ui.grid.container:not(.fluid) {
+  width: min(100% - (var(--cx-page-gutter) * 2), var(--cx-page-max)) !important;
+  max-width: none !important;
+  margin-inline: auto !important;
+}
+
+#navbar {
+  padding-inline: max(var(--cx-page-gutter), calc((100% - var(--cx-page-max)) / 2)) !important;
+}
+
+#navbar-logo {
+  margin-inline-start: -4px;
+}
+
+/* ===================================================================
+   Repository header: breadcrumb in the navbar, tabs below, nothing doubled.
+   =================================================================== */
+
+.cx-nav-crumb {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0 4px !important;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.cx-nav-crumb a {
+  overflow: hidden;
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: var(--color-text-light-1);
+  text-overflow: ellipsis;
+}
+
+.cx-nav-crumb a:hover {
+  background: var(--color-nav-hover-bg);
+  color: var(--color-text);
+}
+
+.cx-nav-crumb .cx-nav-crumb__repo {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.cx-nav-crumb__sep {
+  color: var(--color-text-light-3);
+}
+
+/* The tab bar is the only row under the navbar. */
+.secondary-nav.cx-repo-nav {
+  border-bottom: 1px solid var(--color-light-border) !important;
+}
+
+.secondary-nav.cx-repo-nav overflow-menu.ui.menu,
+.secondary-nav.cx-repo-nav overflow-menu.ui.top.attached.menu {
+  min-height: 46px;
+  margin-block: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.secondary-nav.cx-repo-nav overflow-menu .overflow-menu-items,
+.secondary-nav.cx-repo-nav overflow-menu.ui.menu .item {
+  min-height: 46px;
+}
+
+.secondary-nav.cx-repo-nav overflow-menu .overflow-menu-items > .item:first-child {
+  padding-inline-start: 8px !important;
+}
+
+.secondary-nav .ui.tabs.divider {
+  display: none;
+}
+
+/* Repository title row (Code pages): name, visibility and actions on one line */
+.cx-repo-titlebar {
+  padding-top: 20px;
+}
+
+.cx-repo-titlebar .repo-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--color-light-border);
+}
+
+.cx-repo-titlebar .repo-header .flex-item {
+  gap: 10px;
+  padding: 0;
+}
+
+.cx-repo-titlebar .repo-header .flex-item-leading {
+  display: flex;
+  color: var(--color-text-light-2);
+}
+
+.cx-repo-titlebar .repo-header .flex-item-title {
+  gap: 4px;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.cx-repo-titlebar .repo-header .flex-item-title a:last-child {
+  color: var(--color-text);
+}
+
+.cx-repo-titlebar .repo-header .ui.label {
+  padding: 2px 10px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-light-2);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.cx-repo-titlebar .repo-buttons {
+  gap: 8px;
+}
+
+.cx-repo-titlebar .fork-flag {
+  margin-top: 8px;
+  color: var(--color-text-light-2);
+  font-size: 0.82rem;
+}
+
+/* Repository home: the stats row now lives in the main column, so the
+   file list and the About card start on the same line. */
+.repository.file.list .ui.container > .repo-home-grid {
+  margin-top: 20px;
+}
+
+.repository .repo-home-main > .repository-summary {
+  margin-top: 0 !important;
+}
+
+.repository .repo-home-sidebar {
+  position: sticky;
+  top: 16px;
+}
+
+/* ===================================================================
+   Signed-in home (dashboard): sidebar · feed · quick actions
+   =================================================================== */
+
+.page-content.dashboard.cx-dashboard {
+  padding: 28px 0 56px;
+}
+
+.page-content.cx-dashboard > .ui.container.cx-dash {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 280px;
+  align-items: start;
+  gap: 28px;
+}
+
+.cx-dash__side,
+.cx-dash__aside {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Context switcher (user / org) sits on top of the sidebar instead of being a second bar */
+.cx-dash__side > .secondary-nav {
+  border: 1px solid var(--color-light-border) !important;
+  border-radius: var(--cx-radius-md);
+  background: var(--color-card) !important;
+}
+
+.cx-dash__side > .secondary-nav > .ui.menu {
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 0;
+  margin: 0;
+  padding: 6px;
+  border: 0;
+}
+
+.cx-dash__side > .secondary-nav > .ui.menu > .item,
+.cx-dash__side > .secondary-nav .right.menu > .item {
+  justify-content: flex-start;
+  margin: 0 !important;
+  padding: 8px 10px !important;
+  border-radius: 8px;
+}
+
+.cx-dash__side > .secondary-nav .right.menu {
+  flex-direction: column;
+  align-items: stretch;
+  margin: 4px 0 0 !important;
+  padding-top: 4px;
+  border-top: 1px solid var(--color-light-border);
+}
+
+.cx-dash__side > .secondary-nav .right.menu > .item.active {
+  background: var(--color-primary-alpha-10);
+  color: var(--color-primary);
+}
+
+/* Repository / organisation list */
+.cx-dash__side #dashboard-repo-list {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.cx-dash__side #dashboard-repo-list > div {
+  overflow: hidden;
+  border: 1px solid var(--color-light-border);
+  border-radius: var(--cx-radius-md);
+  background: var(--color-card);
+}
+
+.cx-dash__side #dashboard-repo-list .tabs-with-labels {
+  margin: 0;
+  padding: 4px 6px 0;
+  border-bottom: 1px solid var(--color-light-border);
+}
+
+.cx-dash__side #dashboard-repo-list .tabs-with-labels > .item {
+  padding: 10px 8px !important;
+  font-size: 0.85rem;
+}
+
+.cx-dash__side #dashboard-repo-list .tabs-with-labels > .item.active {
+  box-shadow: inset 0 -2px 0 var(--color-primary);
+}
+
+.cx-dash__side #dashboard-repo-list .ui.attached.segment,
+.cx-dash__side #dashboard-repo-list .ui.attached.table {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.cx-dash__side #dashboard-repo-list .repos-search {
+  padding: 10px;
+}
+
+.cx-dash__side #dashboard-repo-list .repos-search input {
+  border-radius: 8px;
+}
+
+.cx-dash__side #dashboard-repo-list .repos-filter {
+  margin: 0;
+  padding: 0 6px;
+  border-bottom: 1px solid var(--color-light-border) !important;
+}
+
+.cx-dash__side #dashboard-repo-list .repos-filter .item {
+  padding: 8px 6px !important;
+  font-size: 0.78rem;
+}
+
+.cx-dash__side #dashboard-repo-list .repo-owner-name-list .item {
+  padding: 6px 12px !important;
+  border: 0 !important;
+}
+
+.cx-dash__side #dashboard-repo-list .repo-owner-name-list .item:hover {
+  background: var(--color-hover);
+}
+
+.cx-dash__side #dashboard-repo-list .repo-list-link {
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+/* Main column */
+.cx-dash__hello {
+  margin-bottom: 18px;
+}
+
+.cx-dash__hello h1 {
+  margin: 10px 0 0;
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+}
+
+.cx-dash__hello h1 em {
+  color: var(--color-primary);
+  font-family: var(--cx-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.cx-dashboard #user-heatmap {
+  margin-bottom: 20px;
+  padding: 16px 16px 8px;
+  border: 1px solid var(--color-light-border);
+  border-radius: var(--cx-radius-md);
+  background: var(--color-card);
+}
+
+.cx-dashboard #user-heatmap + .divider {
+  display: none;
+}
+
+.cx-dash__title {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.cx-dashboard #activity-feed {
+  overflow: hidden;
+  border: 1px solid var(--color-light-border);
+  border-radius: var(--cx-radius-md);
+  background: var(--color-card);
+}
+
+.cx-dashboard #activity-feed > .flex-item {
+  padding: 14px 16px;
+  border-color: var(--color-light-border);
+}
+
+.cx-dashboard #activity-feed .flex-item-leading img {
+  border-radius: 50%;
+}
+
+/* Right column cards */
+.cx-dash-card {
+  padding: 18px;
+  border: 1px solid var(--color-light-border);
+  border-radius: var(--cx-radius-md);
+  background: var(--color-card);
+  box-shadow: inset 0 1px 0 var(--cognix-inner-highlight);
+}
+
+.cx-dash-card h2 {
+  margin: 0 0 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.cx-dash-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cx-dash-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 9px;
+  color: var(--color-text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: border-color 150ms var(--ease), background-color 150ms var(--ease);
+}
+
+.cx-dash-action:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-light-border));
+  background: var(--color-primary-alpha-10);
+  color: var(--color-text);
+}
+
+.cx-dash-action__icon {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--color-primary-alpha-10);
+  color: var(--color-primary);
+}
+
+.cx-dash-card--ink {
+  border-color: transparent;
+  background:
+    radial-gradient(circle at 1px 1px, rgb(242 239 233 / 9%) 1px, transparent 0) 0 0 / 6px 6px,
+    linear-gradient(to bottom, #121212 35%, #0b3d23);
+  color: #f2efe9;
+}
+
+.cx-dash-card--ink .cx-eyebrow {
+  color: #a3a09a;
+}
+
+.cx-dash-card__title {
+  margin: 10px 0 14px;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.cx-dash-card__title em {
+  color: #1cd86a;
+  font-family: var(--cx-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.cx-dash-links {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cx-dash-links a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-top: 1px solid rgb(242 239 233 / 10%);
+  color: #d5d2ca;
+  font-size: 0.85rem;
+}
+
+.cx-dash-links a:hover {
+  color: #1cd86a;
+}
+
+@media (max-width: 1199.98px) {
+  .page-content.cx-dashboard > .ui.container.cx-dash { grid-template-columns: 280px minmax(0, 1fr); }
+  .cx-dash__aside { display: none; }
+}
+
+@media (max-width: 860px) {
+  .page-content.cx-dashboard > .ui.container.cx-dash { grid-template-columns: minmax(0, 1fr); }
+  .cx-dash__side { position: static; order: 2; }
+  .cx-dash__main { order: 1; }
+}

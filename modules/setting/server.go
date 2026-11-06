@@ -142,11 +142,23 @@ func generateDisplayName() string {
 	return appDisplayName
 }
 
+// normalizeLegacyBranding replaces the upstream installer defaults that instances set up before
+// the GitCode rebrand still carry in app.ini, so the old name never shows up in the UI.
+func normalizeLegacyBranding() {
+	if AppName == "Forgejo" || strings.HasPrefix(AppName, "Forgejo:") || strings.HasPrefix(AppName, "Forgejo ") {
+		AppName = "GitCode"
+	}
+	if strings.EqualFold(AppSlogan, "Beyond coding. We Forge.") {
+		AppSlogan = "Branch boldly. Merge with calm."
+	}
+}
+
 func loadServerFrom(rootCfg ConfigProvider) {
 	sec := rootCfg.Section("server")
 	AppName = rootCfg.Section("").Key("APP_NAME").MustString("GitCode")
 	AppSlogan = rootCfg.Section("").Key("APP_SLOGAN").MustString("")
 	AppDisplayNameFormat = rootCfg.Section("").Key("APP_DISPLAY_NAME_FORMAT").MustString("{APP_NAME}: {APP_SLOGAN}")
+	normalizeLegacyBranding()
 	AppDisplayName = generateDisplayName()
 	Domain = sec.Key("DOMAIN").MustString("localhost")
 	HTTPAddr = sec.Key("HTTP_ADDR").MustString("0.0.0.0")

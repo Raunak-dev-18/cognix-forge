@@ -66,7 +66,7 @@
 		"few": "%s stebėtojai",
 		"other": "%s stebėtojų"
 	},
-	"themes.names.forgejo-auto": "Forgejo (sekti sistemos temą)",
+	"themes.names.forgejo-auto": "GitCode (sekti sistemos temą)",
 	"error.not_found.title": "Puslapis nerastas",
 	"alert.asset_load_failed": "Nepavyko įkelti išteklių failų iš {path}. Įsitikinkite, kad išteklių failai yra pasiekiami.",
 	"install.invalid_lfs_path": "Nepavyko sukurti LFS šakninio katalogo nurodytame kelyje: %[1]s",
@@ -128,9 +128,9 @@
 		"few": "sujungti %[1]d įsipareigojimai iš <code>%[2]s</code> į<code>%[3]s</code> %[4]s",
 		"other": "sujungta %[1]d įsipareigojimų iš <code>%[2]s</code> į<code>%[3]s</code> %[4]s"
 	},
-	"incorrect_root_url": "Ši „Forgejo“ instancija sukonfigūruota veikti adresu „%s“. Šiuo metu žiūrite „Forgejo“ per kitą URL adresą, todėl kai kurios programos dalys gali veikti netinkamai. Kanoninį URL adresą „Forgejo“ administratoriai nustato naudodami `ROOT_URL` parametrą `app.ini` faile.",
-	"themes.names.forgejo-light": "Forgejo šviesi tema",
-	"themes.names.forgejo-dark": "Forgejo tamsi tema",
+	"incorrect_root_url": "Ši „GitCode“ instancija sukonfigūruota veikti adresu „%s“. Šiuo metu žiūrite „GitCode“ per kitą URL adresą, todėl kai kurios programos dalys gali veikti netinkamai. Kanoninį URL adresą „GitCode“ administratoriai nustato naudodami `ROOT_URL` parametrą `app.ini` faile.",
+	"themes.names.forgejo-light": "GitCode šviesi tema",
+	"themes.names.forgejo-dark": "GitCode tamsi tema",
 	"admin.config.moderation_config": "Moderavimo konfigūracija",
 	"moderation.report_abuse": "Pranešti apie piktnaudžiavimą",
 	"moderation.report_content": "Pranešti apie turinį",

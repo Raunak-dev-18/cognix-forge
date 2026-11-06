@@ -179,6 +179,6 @@
 	"repo.pulls.poster_trust_revoke": "निरस्त करें",
 	"search.fuzzy_tooltip": "उन परिणामों को शामिल करें जो खोज शब्द से लगभग मेल खाते हैं",
 	"settings.access_token.admin_disabled": "प्रशासनिक अनुमतियाँ अक्षम हैं।",
-	"settings.must_enable_2fa": "यह Forgejo इंस्टेंस उपयोगकर्ताओं से अपेक्षा करता है कि वे अपने खातों तक पहुँचने से पहले दो-कारक प्रमाणीकरण सक्षम करें।",
-	"admin.dashboard.actions_action_user": "निष्क्रिय उपयोगकर्ताओं के लिए Forgejo Actions विश्वास निरस्त करें"
+	"settings.must_enable_2fa": "यह GitCode इंस्टेंस उपयोगकर्ताओं से अपेक्षा करता है कि वे अपने खातों तक पहुँचने से पहले दो-कारक प्रमाणीकरण सक्षम करें।",
+	"admin.dashboard.actions_action_user": "निष्क्रिय उपयोगकर्ताओं के लिए GitCode Actions विश्वास निरस्त करें"
 }

@@ -311,7 +311,7 @@
 	"search.milestone_kind": "معالم البحث…",
 	"moderation.abuse_category.other_violations": "انتهاكات أخرى لقواعد المنصة",
 	"repo.issue_indexer.title": "مفهرس الإبلاغات",
-	"incorrect_root_url": "تم تكوين هذه النسخة من Forgejo لتعمل على العنوان \"%s\". أنت تقوم حاليًا بتصفّح Forgejo عبر رابط مختلف، مما قد يتسبب في تعطل بعض أجزاء التطبيق. يتم تحديد الرابط الرسمي (canonical URL) من قِبل مسؤولي Forgejo من خلال إعداد `ROOT_URL` في ملف `app.ini`.",
+	"incorrect_root_url": "تم تكوين هذه النسخة من GitCode لتعمل على العنوان \"%s\". أنت تقوم حاليًا بتصفّح GitCode عبر رابط مختلف، مما قد يتسبب في تعطل بعض أجزاء التطبيق. يتم تحديد الرابط الرسمي (canonical URL) من قِبل مسؤولي GitCode من خلال إعداد `ROOT_URL` في ملف `app.ini`.",
 	"error.not_found.title": "الصفحة غير موجودة",
 	"themes.names.forgejo-auto": "فورجيو (اتبع سمة النظام)",
 	"themes.names.forgejo-light": "فورجيجو المضيء",
@@ -375,7 +375,7 @@
 	"repo.settings.push_mirror.branch_filter.label": "تصفية الفرع (اختياري)",
 	"repo.settings.push_mirror.branch_filter.description": "الفروع المطلوب عكسها. اترك الحقل فارغًا لعكس جميع الفروع. راجع توثيق <a href=\"%[1]s\">%[2]s</a> للاطلاع على الصيغة. أمثلة: <code>main, release/*</code>",
 	"og.repo.summary_card.alt_description": "بطاقة تلخيصية للمستودع %[1]، موصوفة بـ %[1]: %[2]s",
-	"meta.last_line": "شكرًا لك على ترجمة Forgejo! هذا السطر لا يراه المستخدمون ولكنه يخدم أغراضًا أخرى في إدارة الترجمة. يمكنك وضع حقيقة ممتعة في الترجمة بدلاً من ترجمتها.",
+	"meta.last_line": "شكرًا لك على ترجمة GitCode! هذا السطر لا يراه المستخدمون ولكنه يخدم أغراضًا أخرى في إدارة الترجمة. يمكنك وضع حقيقة ممتعة في الترجمة بدلاً من ترجمتها.",
 	"relativetime.future": "في المستقبل",
 	"avatar.constraints_hint": "لا يمكن أن يتجاوز حجم الصورة الشخصية المخصصة %[1]s، ولا أبعادها عن %[2]d×%[3]d بكسل",
 	"repo.pulls.merged_title_desc": {

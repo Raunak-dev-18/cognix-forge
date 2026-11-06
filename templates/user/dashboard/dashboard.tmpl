@@ -1,17 +1,58 @@
 {{template "base/head" .}}
-<div role="main" aria-label="{{.Title}}" class="page-content dashboard feeds">
-	{{template "user/dashboard/navbar" .}}
-	<div class="ui container flex-container">
-		<div class="flex-container-main">
+<div role="main" aria-label="{{.Title}}" class="page-content dashboard feeds cx-dashboard">
+	<div class="ui container cx-dash">
+		<aside class="cx-dash__side">
+			{{template "user/dashboard/navbar" .}}
+			{{template "user/dashboard/repolist" .}}
+		</aside>
+
+		<div class="cx-dash__main">
 			{{template "base/alert" .}}
+			<header class="cx-dash__hello">
+				<p class="cx-eyebrow"><span class="cx-eyebrow__mark" aria-hidden="true">✳</span> {{ctx.Locale.Tr "dashboard"}}</p>
+				<h1>Welcome back, <em>{{.SignedUser.DisplayName}}</em></h1>
+			</header>
 			{{template "user/heatmap" .}}
 			{{if .Feeds}}
+				<h2 class="cx-dash__title">Recent activity</h2>
 				{{template "user/dashboard/feeds" .}}
 			{{else}}
 				{{template "user/dashboard/guide" .}}
 			{{end}}
 		</div>
-		{{template "user/dashboard/repolist" .}}
+
+		<aside class="cx-dash__aside">
+			<section class="cx-dash-card">
+				<h2>Start something new</h2>
+				<div class="cx-dash-actions">
+					<a class="cx-dash-action" href="{{AppSubUrl}}/repo/create">
+						<span class="cx-dash-action__icon">{{svg "octicon-repo" 16}}</span>
+						<span>{{ctx.Locale.Tr "new_repo.link"}}</span>
+					</a>
+					{{if not .DisableMigrations}}
+					<a class="cx-dash-action" href="{{AppSubUrl}}/repo/migrate">
+						<span class="cx-dash-action__icon">{{svg "octicon-repo-push" 16}}</span>
+						<span>{{ctx.Locale.Tr "new_migrate.link"}}</span>
+					</a>
+					{{end}}
+					{{if .SignedUser.CanCreateOrganization}}
+					<a class="cx-dash-action" href="{{AppSubUrl}}/org/create">
+						<span class="cx-dash-action__icon">{{svg "octicon-organization" 16}}</span>
+						<span>{{ctx.Locale.Tr "new_org.link"}}</span>
+					</a>
+					{{end}}
+				</div>
+			</section>
+			<section class="cx-dash-card cx-dash-card--ink">
+				<p class="cx-eyebrow"><span class="cx-eyebrow__mark" aria-hidden="true">✳</span> {{ctx.Locale.Tr "explore"}}</p>
+				<p class="cx-dash-card__title">Find your next <em>favourite project.</em></p>
+				<div class="cx-dash-links">
+					<a href="{{AppSubUrl}}/explore/repos">{{ctx.Locale.Tr "explore.repos"}} {{svg "octicon-arrow-right" 14}}</a>
+					<a href="{{AppSubUrl}}/explore/users">{{ctx.Locale.Tr "explore.users"}} {{svg "octicon-arrow-right" 14}}</a>
+					<a href="{{AppSubUrl}}/explore/organizations">{{ctx.Locale.Tr "explore.organizations"}} {{svg "octicon-arrow-right" 14}}</a>
+				</div>
+			</section>
+		</aside>
 	</div>
 </div>
 {{template "base/footer" .}}

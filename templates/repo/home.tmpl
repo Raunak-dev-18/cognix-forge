@@ -51,8 +51,8 @@
 				{{end}}
 			</div>
 		{{end}}
-		{{template "repo/sub_menu" .}}
 		{{if $isHomepage}}<div class="repo-home-grid"><div class="repo-home-main">{{end}}
+		{{template "repo/sub_menu" .}}
 		<div class="repo-button-row">
 			<div class="button-sequence tw-gap-y-2">
 				{{template "repo/branch_dropdown" dict "root" .}}

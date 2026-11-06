@@ -93,7 +93,7 @@
 	"repo.issues.filter_poster.hint": "Filtrar por autor",
 	"repo.issues.filter_assignee.hint": "Filtrar por usuario asignado",
 	"avatar.constraints_hint": "O avatar persoal non pode pesar máis de %s nin superar o tamaño de %dx%d píxeles",
-	"error.must_enable_2fa": "Esta instancia de Forgejo require que os usuarios activen a autenticación en dous pasos antes de acceder ás súas contas. Habilitaa en: %s",
+	"error.must_enable_2fa": "Esta instancia de GitCode require que os usuarios activen a autenticación en dous pasos antes de acceder ás súas contas. Habilitaa en: %s",
 	"user.activitypub_feed.feed": "Fediverse Feed",
 	"user.activitypub_feed.no_activity": "Sen actividade no fediverso",
 	"relativetime.duration.secs": {

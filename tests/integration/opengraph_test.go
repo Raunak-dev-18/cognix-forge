@@ -18,7 +18,7 @@ import (
 
 func TestOpenGraphProperties(t *testing.T) {
 	defer tests.PrepareTestEnv(t)()
-	siteName := "Forgejo: Beyond coding. We Forge."
+	siteName := "GitCode: Branch boldly. Merge with calm."
 
 	cases := []struct {
 		name     string

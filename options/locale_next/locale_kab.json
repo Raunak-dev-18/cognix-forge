@@ -99,8 +99,8 @@
 	"relativetime.1week": "dduṛt yezrin",
 	"relativetime.1month": "ayyur yezrin",
 	"relativetime.1year": "ilindi",
-	"themes.names.forgejo-light": "Forgejo aceɛlal",
-	"themes.names.forgejo-dark": "Forgejo ubrik",
+	"themes.names.forgejo-light": "GitCode aceɛlal",
+	"themes.names.forgejo-dark": "GitCode ubrik",
 	"profile.actions.tooltip": "Ugar n tigawin",
 	"profile.edit.link": "Ẓreg amaɣnu",
 	"keys.ssh.link": "Tasarut SSH",
@@ -110,7 +110,7 @@
 	"error.not_found.title": "Asebtar ulac-it",
 	"moderation.abuse_category.placeholder": "Fren taggayt",
 	"migrate.pagure.project_url": "Tansa URL n usenfar Pagure",
-	"themes.names.forgejo-auto": "Forgejo (akken i yella usentel n unagraw)",
+	"themes.names.forgejo-auto": "GitCode (akken i yella usentel n unagraw)",
 	"stars.n_stars": {
 		"one": "%s n yitri",
 		"other": "%s n yitran"

@@ -3,13 +3,24 @@
 	{{$notificationUnreadCount = call .NotificationUnreadCount}}
 {{end}}
 
-<nav id="navbar" aria-label="{{ctx.Locale.Tr "aria.navbar"}}">
+{{/* On repository pages the navbar shows an owner / repo breadcrumb (like GitHub) and the global
+     Issues / Pull requests links become icons, so they are not repeated next to the repo tabs. */}}
+{{$inRepo := and .Repository .RepoLink}}
+{{$navLinkCls := ""}}{{if $inRepo}}{{$navLinkCls = " only-mobile"}}{{end}}
+<nav id="navbar" aria-label="{{ctx.Locale.Tr "aria.navbar"}}"{{if $inRepo}} class="cx-navbar--repo"{{end}}>
 	<div class="navbar-left ui secondary menu">
 		<!-- the logo -->
 		<a class="item" id="navbar-logo" href="{{AppSubUrl}}/" aria-label="{{if .IsSigned}}{{ctx.Locale.Tr "dashboard"}}{{else}}{{ctx.Locale.Tr "home"}}{{end}}">
 			<img width="26" height="26" src="{{AssetUrlPrefix}}/img/logo.svg?v={{AssetVersion}}" alt="{{ctx.Locale.Tr "logo"}}" aria-hidden="true">
-			<span class="cx-wordmark not-mobile">{{AppName}}</span>
+			{{if not $inRepo}}<span class="cx-wordmark not-mobile">{{AppName}}</span>{{end}}
 		</a>
+		{{if $inRepo}}
+		<div class="cx-nav-crumb item not-mobile">
+			<a href="{{AppSubUrl}}/{{.Repository.OwnerName | PathEscape}}">{{.Repository.OwnerName}}</a>
+			<span class="cx-nav-crumb__sep" aria-hidden="true">/</span>
+			<a class="cx-nav-crumb__repo" href="{{.RepoLink}}">{{.Repository.Name}}</a>
+		</div>
+		{{end}}
 
 		<!-- mobile right menu, it must be here because in mobile view, each item is a flex column, the first item is a full row column -->
 		<div class="ui secondary menu item navbar-mobile-right only-mobile">
@@ -29,21 +40,21 @@
 			{{/* No links */}}
 		{{else if .IsSigned}}
 			{{if not .UnitIssuesGlobalDisabled}}
-				<a class="item{{if .PageIsIssues}} active{{end}}" {{if .PageIsIssues}}aria-current="page" {{end}}href="{{AppSubUrl}}/issues">{{ctx.Locale.Tr "issues"}}</a>
+				<a class="item{{$navLinkCls}}{{if .PageIsIssues}} active{{end}}" {{if .PageIsIssues}}aria-current="page" {{end}}href="{{AppSubUrl}}/issues">{{ctx.Locale.Tr "issues"}}</a>
 			{{end}}
 			{{if not .UnitPullsGlobalDisabled}}
-				<a class="item{{if .PageIsPulls}} active{{end}}" {{if .PageIsPulls}}aria-current="page" {{end}}href="{{AppSubUrl}}/pulls">{{ctx.Locale.Tr "pull_requests"}}</a>
+				<a class="item{{$navLinkCls}}{{if .PageIsPulls}} active{{end}}" {{if .PageIsPulls}}aria-current="page" {{end}}href="{{AppSubUrl}}/pulls">{{ctx.Locale.Tr "pull_requests"}}</a>
 			{{end}}
 			{{if not (and .UnitIssuesGlobalDisabled .UnitPullsGlobalDisabled)}}
 				{{if .ShowMilestonesDashboardPage}}
-					<a class="item{{if .PageIsMilestonesDashboard}} active{{end}}" {{if .PageIsMilestonesDashboard}}aria-current="page" {{end}}href="{{AppSubUrl}}/milestones">{{ctx.Locale.Tr "milestones"}}</a>
+					<a class="item{{$navLinkCls}}{{if .PageIsMilestonesDashboard}} active{{end}}" {{if .PageIsMilestonesDashboard}}aria-current="page" {{end}}href="{{AppSubUrl}}/milestones">{{ctx.Locale.Tr "milestones"}}</a>
 				{{end}}
 			{{end}}
-			<a class="item{{if .PageIsExplore}} active{{end}}" {{if .PageIsExplore}}aria-current="page" {{end}}href="{{AppSubUrl}}/explore/repos">{{ctx.Locale.Tr "explore"}}</a>
+			<a class="item{{$navLinkCls}}{{if .PageIsExplore}} active{{end}}" {{if .PageIsExplore}}aria-current="page" {{end}}href="{{AppSubUrl}}/explore/repos">{{ctx.Locale.Tr "explore"}}</a>
 		{{else if .IsLandingPageOrganizations}}
-			<a class="item{{if .PageIsExplore}} active{{end}}" {{if .PageIsExplore}}aria-current="page" {{end}}href="{{AppSubUrl}}/explore/organizations">{{ctx.Locale.Tr "explore"}}</a>
+			<a class="item{{$navLinkCls}}{{if .PageIsExplore}} active{{end}}" {{if .PageIsExplore}}aria-current="page" {{end}}href="{{AppSubUrl}}/explore/organizations">{{ctx.Locale.Tr "explore"}}</a>
 		{{else}}
-			<a class="item{{if .PageIsExplore}} active{{end}}" {{if .PageIsExplore}}aria-current="page" {{end}}href="{{AppSubUrl}}/explore/repos">{{ctx.Locale.Tr "explore"}}</a>
+			<a class="item{{$navLinkCls}}{{if .PageIsExplore}} active{{end}}" {{if .PageIsExplore}}aria-current="page" {{end}}href="{{AppSubUrl}}/explore/repos">{{ctx.Locale.Tr "explore"}}</a>
 		{{end}}
 
 		{{template "custom/extra_links" .}}
@@ -121,6 +132,14 @@
 			</div>
 			{{end}}
 
+			{{if $inRepo}}
+				{{if not .UnitIssuesGlobalDisabled}}
+				<a class="item not-mobile tw-mx-0" href="{{AppSubUrl}}/issues" data-tooltip-content="{{ctx.Locale.Tr "issues"}}" aria-label="{{ctx.Locale.Tr "issues"}}">{{svg "octicon-issue-opened"}}</a>
+				{{end}}
+				{{if not .UnitPullsGlobalDisabled}}
+				<a class="item not-mobile tw-mx-0" href="{{AppSubUrl}}/pulls" data-tooltip-content="{{ctx.Locale.Tr "pull_requests"}}" aria-label="{{ctx.Locale.Tr "pull_requests"}}">{{svg "octicon-git-pull-request"}}</a>
+				{{end}}
+			{{end}}
 			<a class="item not-mobile tw-mx-0" href="{{AppSubUrl}}/notifications" data-tooltip-content="{{ctx.Locale.Tr "notifications"}}" aria-label="{{ctx.Locale.Tr "notifications"}}">
 				<div class="notification-icon-relative">
 					{{svg "octicon-bell"}}

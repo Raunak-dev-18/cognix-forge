@@ -32,7 +32,7 @@ if [ ! -f ${GITEA_CUSTOM}/conf/app.ini ]; then
     fi
 
     # Substitute the environment variables in the template
-    APP_NAME=${APP_NAME:-"Forgejo: Beyond coding. We forge."} \
+    APP_NAME=${APP_NAME:-"GitCode"} \
     RUN_MODE=${RUN_MODE:-"prod"} \
     DOMAIN=${DOMAIN:-"localhost"} \
     SSH_DOMAIN=${SSH_DOMAIN:-"localhost"} \

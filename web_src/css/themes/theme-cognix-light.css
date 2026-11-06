@@ -5,6 +5,7 @@
 @import "../cognix-brand.css";
 @import "../cognix-shell.css";
 @import "../cognix-pages.css";
+@import "../cognix-layout.css";
 
 :root {
   --is-dark-theme: false;
