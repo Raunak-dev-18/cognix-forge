@@ -316,6 +316,21 @@ h1, h2, h3, h4 {
   color: var(--color-primary-contrast);
 }
 
+/* Cognix dither bands: footer ground and home hero sky */
+.page-footer {
+  background-image: url("./cognix-dither-dark.png");
+  background-repeat: repeat-x;
+  background-position: bottom center;
+  background-size: auto 160px;
+}
+
+.page-content.home {
+  background-image: url("./cognix-dither-dark.png");
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: min(1400px, 100%) auto;
+}
+
 /* invert emojis that are hard to read otherwise */
 .emoji[aria-label="check mark"],
 .emoji[aria-label="currency exchange"],

@@ -7,6 +7,9 @@ All colors come from theme variables so both tones share this layer.
 
 :root {
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  /* GitHub-like compact buttons */
+  --button-min-height: 32px;
+  --button-padding-inline: 0.9rem;
 }
 
 /* ---------- Buttons ----------
@@ -254,9 +257,11 @@ dialog.modal header {
   border-radius: 6px;
 }
 
-/* ---------- Footer ---------- */
+/* ---------- Footer ----------
+   Ground band with room for the dither horizon. */
 
 .page-footer {
+  padding: 32px 20px 56px;
   border-top: 1px solid var(--color-light-border);
 }
 
