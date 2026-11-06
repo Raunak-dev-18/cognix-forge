@@ -1,8 +1,10 @@
-@import "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap";
+@import "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Instrument+Serif:ital@0;1&display=swap";
 @import "../chroma/dark.css";
 @import "../codemirror/dark.css";
 @import "../markup/dark.css";
 @import "../cognix-brand.css";
+@import "../cognix-shell.css";
+@import "../cognix-pages.css";
 
 :root {
   --is-dark-theme: true;

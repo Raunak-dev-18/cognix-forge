@@ -1,0 +1,884 @@
+/*
+GitCode shell: unified header, landing page and auth pages.
+Imported by the Cognix themes after cognix-brand.css, so it wins at equal specificity.
+Class prefix `cx-` marks GitCode-specific markup.
+*/
+
+/* cognix-brand.css references these; map them onto the base font stacks
+   (--fonts-regular is defined on `:root *` in base.css, so match that scope) */
+:root * {
+  --font-family: var(--fonts-regular);
+  --font-family-monospace: var(--fonts-monospace);
+}
+
+:root {
+  --cx-radius-lg: 18px;
+  --cx-radius-md: 12px;
+  --cx-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --cx-header-h: 56px;
+}
+
+/* ===================================================================
+   Unified header
+   One bar. On pages with a section header (repo, org, explore,
+   dashboard) the global navbar and the section header share one
+   surface and a single bottom rule, like GitHub.
+   =================================================================== */
+
+#navbar {
+  position: relative;
+  z-index: 20;
+  min-height: var(--cx-header-h);
+  gap: 12px;
+  background: var(--color-nav-bg);
+  border-bottom: 1px solid var(--color-light-border);
+}
+
+body:has(.page-content .secondary-nav:first-child) #navbar,
+body:has(.page-content > .secondary-nav) #navbar {
+  border-block-end-color: transparent;
+}
+
+.page-content > .secondary-nav,
+.page-content .secondary-nav:first-child {
+  margin-top: 0 !important;
+  background: var(--color-nav-bg) !important;
+  border-bottom: 1px solid var(--color-light-border) !important;
+}
+
+.secondary-nav .repo-header {
+  padding-top: 4px;
+  padding-bottom: 8px;
+  border-bottom: 0;
+}
+
+.secondary-nav overflow-menu.ui.menu,
+.secondary-nav overflow-menu.ui.secondary.menu {
+  min-height: 44px;
+  border-bottom: 0 !important;
+}
+
+.secondary-nav overflow-menu .overflow-menu-items,
+.secondary-nav overflow-menu.ui.menu .item {
+  min-height: 44px;
+}
+
+#navbar .navbar-left,
+#navbar .navbar-right {
+  min-height: var(--cx-header-h);
+  align-items: center;
+  gap: 2px;
+}
+
+#navbar-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-inline-end: 12px;
+  padding-inline: 4px !important;
+  background: transparent !important;
+}
+
+#navbar-logo .cx-wordmark {
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+#navbar .navbar-left > a.item:not(#navbar-logo) {
+  height: 32px;
+  padding-inline: 10px;
+  color: var(--color-text-light-1);
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+}
+
+#navbar .navbar-left > a.item:not(#navbar-logo):hover {
+  color: var(--color-text);
+  background: var(--color-nav-hover-bg);
+}
+
+#navbar .navbar-left > a.item[aria-current="page"] {
+  color: var(--color-text);
+  background: var(--color-nav-hover-bg);
+}
+
+#navbar .navbar-right > .item:not(.cx-nav-search),
+#navbar .navbar-right .dialog-dropdown > .opener {
+  height: 32px;
+  min-width: 32px;
+  border-radius: 8px;
+  color: var(--color-text-light-1);
+}
+
+#navbar .navbar-right > a.item:hover,
+#navbar .navbar-right .dialog-dropdown > .opener:hover {
+  color: var(--color-text);
+  background: var(--color-nav-hover-bg);
+}
+
+#navbar .navbar-right .dialog-dropdown > .opener {
+  border: 1px solid var(--color-light-border);
+  margin-inline-start: 4px;
+}
+
+/* Header search: GitHub-style "type / to search" pill */
+#navbar .cx-nav-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 260px;
+  height: 32px;
+  margin-inline-end: 6px;
+  padding: 0 6px 0 10px !important;
+  border: 1px solid var(--color-light-border);
+  border-radius: 8px;
+  background: var(--color-body);
+  color: var(--color-text-light-2);
+  cursor: text;
+  transition: border-color 150ms var(--ease), box-shadow 150ms var(--ease), width 200ms var(--ease);
+}
+
+#navbar .cx-nav-search:focus-within {
+  width: 320px;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-alpha-20);
+}
+
+#navbar .cx-nav-search input {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none !important;
+  color: var(--color-text);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+#navbar .cx-nav-search input::-webkit-search-cancel-button { display: none; }
+
+#navbar .cx-nav-search kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 5px;
+  color: var(--color-text-light-2);
+  font: 500 11px/1 var(--font-family-monospace);
+}
+
+#navbar .cx-nav-search:focus-within kbd { display: none; }
+
+/* Signed-out actions */
+#navbar .cx-nav-signin {
+  padding-inline: 12px !important;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+}
+
+#navbar .cx-nav-signup {
+  padding-inline: 14px !important;
+  border: 1px solid var(--color-text) !important;
+  border-radius: 8px;
+  color: var(--color-text) !important;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+}
+
+#navbar .cx-nav-signup:hover {
+  background: var(--color-text) !important;
+  color: var(--color-body) !important;
+}
+
+@media (max-width: 767.98px) {
+  #navbar .cx-nav-search { display: none; }
+  #navbar .cx-nav-signup { justify-content: center; margin-top: 6px; }
+}
+
+/* Repo counters (commits / branches / tags / size): inline chips, not a second bar */
+.repository .repository-summary {
+  margin: 4px 0 12px !important;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.page-content.repository .repository-summary .segment.repository-menu {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  padding: 0;
+  border: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page-content.repository .repository-summary .item {
+  flex: none;
+  justify-content: flex-start;
+  padding: 4px 0;
+  color: var(--color-text-light-2);
+  font-size: 0.85rem;
+}
+
+.repository .repository-summary .item b { color: var(--color-text); }
+
+.repository .repository-summary .item:hover { color: var(--color-primary); }
+
+.repository .repository-summary #language-stats {
+  margin-top: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+/* cognix-brand.css gives every input a 36px min-height; keep checkboxes and radios native-sized */
+input[type="checkbox"],
+input[type="radio"] {
+  min-height: 0;
+}
+
+/* ===================================================================
+   Shared GitCode primitives
+   =================================================================== */
+
+.cx-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--color-text-light-2);
+  font: 500 0.7rem/1.4 var(--font-family-monospace);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.cx-eyebrow__mark {
+  color: var(--cognix-green);
+  font-size: 0.95rem;
+  letter-spacing: 0;
+}
+
+.cx-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--cognix-green);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cognix-green) 22%, transparent);
+}
+
+.cx-gittree {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  color: var(--color-text);
+  --gt-accent: var(--cognix-green);
+  --gt-ink-alpha: 0.32;
+}
+
+.ui.button.cx-btn-lg {
+  min-height: 42px;
+  padding-inline: 1.15rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+}
+
+.ui.button.cx-btn-lg span {
+  margin-inline-start: 0.35rem;
+  transition: transform 150ms var(--ease);
+}
+
+.ui.button.cx-btn-lg:hover span { transform: translateX(2px); }
+
+/* ===================================================================
+   Landing page
+   =================================================================== */
+
+.page-content.home.cx-landing {
+  min-height: 0;
+  padding-bottom: 0;
+  background: var(--color-body);
+  background-image: none;
+  color: var(--color-text);
+}
+
+.cx-landing em {
+  font-family: var(--cx-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.cx-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 64px);
+  width: min(100% - 40px, 1240px);
+  margin: 0 auto;
+  padding: clamp(40px, 7vw, 88px) 0 clamp(40px, 6vw, 72px);
+}
+
+.cx-hero__copy { min-width: 0; }
+
+.cx-hero h1 {
+  margin: 20px 0 0;
+  color: var(--color-text);
+  font-size: clamp(2.6rem, 5.4vw, 4.6rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.cx-hero h1 em { color: var(--color-primary); }
+
+.cx-hero__lede {
+  max-width: 480px;
+  margin: 22px 0 0;
+  color: var(--color-text-light-2);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.cx-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.cx-clone {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  margin-top: 28px;
+  padding: 10px 14px;
+  border: 1px dashed var(--color-light-border);
+  border-radius: 10px;
+  color: var(--color-text-light-2);
+  font: 0.8rem/1.4 var(--font-family-monospace);
+}
+
+.cx-clone code {
+  overflow: hidden;
+  padding: 0;
+  background: none;
+  color: var(--color-text-light-1);
+  font: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cx-clone__prompt { color: var(--cognix-green); }
+
+.cx-hero__art {
+  position: relative;
+  height: clamp(380px, 46vw, 560px);
+  overflow: hidden;
+  border: 1px solid var(--color-light-border);
+  border-radius: var(--cx-radius-lg);
+  background:
+    linear-gradient(to bottom, transparent 55%, color-mix(in srgb, var(--cognix-green) 10%, transparent)),
+    var(--color-box-header);
+  box-shadow: inset 0 1px 0 var(--cognix-inner-highlight), 0 24px 60px -32px var(--cognix-shadow-card);
+}
+
+.cx-hero__chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-card) 82%, transparent);
+  backdrop-filter: blur(8px);
+  color: var(--color-text-light-1);
+  font-size: 0.78rem;
+  box-shadow: 0 8px 24px -12px var(--cognix-shadow-card);
+}
+
+.cx-hero__chip code {
+  padding: 0;
+  background: none;
+  color: var(--color-text);
+  font: 500 0.75rem/1 var(--font-family-monospace);
+}
+
+.cx-hero__chip b { color: var(--color-text); font-weight: 500; }
+
+.cx-hero__chip--top { top: 18px; inset-inline-start: 18px; }
+.cx-hero__chip--bottom { inset-inline-end: 18px; bottom: 18px; }
+
+/* Bento features */
+.cx-features {
+  width: min(100% - 40px, 1240px);
+  margin: 0 auto;
+  padding: clamp(32px, 6vw, 72px) 0;
+  border-top: 1px solid var(--color-light-border);
+}
+
+.cx-section-head { margin-bottom: 32px; }
+
+.cx-section-head h2,
+.cx-cta h2 {
+  margin: 16px 0 0;
+  font-size: clamp(2rem, 3.8vw, 3.1rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.cx-section-head h2 em,
+.cx-cta h2 em { color: var(--color-primary); }
+
+.cx-bento {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cx-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 240px;
+  padding: 22px;
+  overflow: hidden;
+  border: 1px solid var(--color-light-border);
+  border-radius: var(--cx-radius-md);
+  background: var(--color-card);
+  box-shadow: inset 0 1px 0 var(--cognix-inner-highlight);
+  transition: border-color 200ms var(--ease), transform 200ms var(--ease);
+}
+
+.cx-tile:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-light-border));
+}
+
+.cx-tile--wide { grid-column: span 2; }
+
+.cx-tile__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: auto;
+  padding-bottom: 28px;
+}
+
+.cx-tile__num {
+  color: var(--color-text-light-3);
+  font: 500 0.72rem/1 var(--font-family-monospace);
+  letter-spacing: 0.1em;
+}
+
+.cx-tile__icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--color-light-border);
+  border-radius: 8px;
+  color: var(--color-primary);
+}
+
+.cx-tile h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.cx-tile p {
+  max-width: 520px;
+  margin: 0;
+  color: var(--color-text-light-2);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.cx-tile__link {
+  margin-top: 16px;
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.cx-diff {
+  margin-top: 18px;
+  overflow: hidden;
+  border: 1px solid var(--color-light-border);
+  border-radius: 10px;
+  font: 0.8rem/1.5 var(--font-family-monospace);
+}
+
+.cx-diff__line {
+  display: flex;
+  gap: 12px;
+  padding: 6px 12px;
+}
+
+.cx-diff__line code { padding: 0; background: none; font: inherit; }
+
+.cx-diff__line--del { background: var(--color-diff-removed-row-bg); color: var(--color-text-light-1); }
+.cx-diff__line--add { background: var(--color-diff-added-row-bg); }
+.cx-diff__line--del span { color: var(--color-red); }
+.cx-diff__line--add span { color: var(--color-green); }
+
+.cx-diff__comment {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--color-light-border);
+  color: var(--color-text-light-1);
+  font-family: var(--font-family);
+}
+
+.cx-pipeline {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.cx-pipeline > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.cx-pipeline code { padding: 0; background: none; font: 500 0.8rem/1 var(--font-family-monospace); }
+.cx-pipeline__ok { display: inline-flex; color: var(--color-green); }
+.cx-pipeline__t { margin-inline-start: auto; color: var(--color-text-light-3); font: 0.72rem/1 var(--font-family-monospace); }
+
+.cx-pipeline__run {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-yellow);
+  border-inline-end-color: transparent;
+  border-radius: 50%;
+  animation: cx-spin 900ms linear infinite;
+}
+
+@keyframes cx-spin { to { transform: rotate(360deg); } }
+
+.cx-tile--ink {
+  border-color: transparent;
+  background:
+    radial-gradient(circle at 1px 1px, rgb(242 239 233 / 9%) 1px, transparent 0) 0 0 / 6px 6px,
+    linear-gradient(to bottom, #121212 30%, #0b3d23);
+  color: #f2efe9;
+}
+
+.cx-tile--ink p { color: #b5b2aa; }
+.cx-tile--ink .cx-tile__icon { border-color: rgb(242 239 233 / 15%); color: #1cd86a; }
+.cx-tile--ink .cx-tile__num { color: #84817a; }
+
+.cx-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.cx-tags span {
+  padding: 4px 10px;
+  border: 1px solid rgb(242 239 233 / 15%);
+  border-radius: 999px;
+  color: #d5d2ca;
+  font: 0.74rem/1.3 var(--font-family-monospace);
+}
+
+/* Closing call to action on a dithered band */
+.cx-cta {
+  position: relative;
+  padding: clamp(56px, 9vw, 112px) 20px clamp(72px, 10vw, 128px);
+  border-top: 1px solid var(--color-light-border);
+  text-align: center;
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--color-text) 16%, transparent) 1px, transparent 0) 0 0 / 5px 5px;
+  mask-image: none;
+}
+
+.cx-cta::before {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, var(--color-body) 10%, color-mix(in srgb, var(--color-body) 40%, transparent));
+  content: "";
+}
+
+.cx-cta__inner { position: relative; }
+.cx-cta .cx-hero__actions { justify-content: center; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .cx-hero__copy > * { animation: cognix-reveal 700ms var(--ease) both; }
+  .cx-hero__copy > :nth-child(2) { animation-delay: 60ms; }
+  .cx-hero__copy > :nth-child(3) { animation-delay: 120ms; }
+  .cx-hero__copy > :nth-child(4) { animation-delay: 180ms; }
+  .cx-hero__copy > :nth-child(5) { animation-delay: 240ms; }
+  .cx-hero__art { animation: cognix-reveal 900ms var(--ease) 120ms both; }
+}
+
+@media (max-width: 991.98px) {
+  .cx-hero { grid-template-columns: minmax(0, 1fr); }
+  .cx-hero__art { height: 360px; }
+  .cx-bento { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 640px) {
+  .cx-bento { grid-template-columns: 1fr; }
+  .cx-tile--wide { grid-column: auto; }
+  .cx-hero__chip--bottom { inset-inline-start: 18px; }
+}
+
+/* ===================================================================
+   Auth pages: split card, form left, pixel Git tree right.
+   The global navbar and footer step aside on these pages.
+   =================================================================== */
+
+body:has(.page-content.cx-auth) #navbar,
+body:has(.page-content.cx-auth) .page-footer {
+  display: none;
+}
+
+body:has(.page-content.cx-auth) {
+  background: var(--cognix-ground);
+}
+
+.page-content.cx-auth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 72px 20px 40px;
+  background: var(--cognix-ground);
+}
+
+.cx-auth__back {
+  position: absolute;
+  top: 28px;
+  inset-inline-start: max(20px, calc(50% - 450px));
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-light-2);
+  font-size: 0.85rem;
+}
+
+.cx-auth__back:hover { color: var(--color-text); }
+
+.cx-auth__shell {
+  display: grid;
+  grid-template-columns: 400px minmax(0, 1fr);
+  gap: 6px;
+  width: min(100%, 900px);
+  min-height: 560px;
+  padding: 6px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--color-card) 55%, var(--cognix-ground));
+  box-shadow: 0 30px 80px -40px var(--cognix-shadow-card), 0 2px 6px var(--cognix-shadow-card);
+}
+
+.cx-auth__panel {
+  display: flex;
+  flex-direction: column;
+  padding: 32px 32px 24px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 16px;
+  background: var(--color-card);
+}
+
+.cx-auth__head { margin-bottom: 20px; text-align: center; }
+
+.cx-auth__logo {
+  display: inline-grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid var(--color-light-border);
+  border-radius: 13px; /* 27% of the tile, per the Cognix avatar rule */
+  background: var(--color-body);
+  box-shadow: inset 0 1px 0 var(--cognix-inner-highlight), 0 2px 6px var(--cognix-shadow-card);
+}
+
+.cx-auth__head h1 {
+  margin: 18px 0 6px;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.cx-auth__head p {
+  margin: 0;
+  color: var(--color-text-light-2);
+  font-size: 0.9rem;
+}
+
+/* Flatten Forgejo's boxed form markup inside the panel */
+.page-content.cx-auth .ui.container.fluid { width: 100%; }
+
+.page-content.cx-auth .ui.container.fluid > h4.ui.top.attached.header { display: none; }
+
+.page-content.cx-auth .ui.container.fluid > .ui.attached.segment,
+.page-content.cx-auth .ui.container.fluid > .ui.attached.segment.header {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.page-content.cx-auth .ui.container.fluid + .ui.container.fluid {
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.page-content.cx-auth .ui.container.fluid + .ui.container.fluid > .ui.attached.segment.header {
+  gap: 6px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-light-border);
+  color: var(--color-text-light-2);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.page-content.cx-auth .ui.container.fluid + .ui.container.fluid a {
+  color: var(--color-text);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--color-light-border);
+  text-underline-offset: 3px;
+}
+
+.page-content.cx-auth form.ui.form {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.page-content.cx-auth form.ui.form .field { margin-bottom: 14px; }
+
+.page-content.cx-auth form.ui.form .field > label {
+  margin-bottom: 6px;
+  color: var(--color-text-light-1);
+  font-size: 0.8rem;
+}
+
+.page-content.cx-auth form.ui.form .required.field > label::after { display: none; }
+
+.page-content.cx-auth form.ui.form input:not([type="checkbox"]) {
+  height: 40px;
+  border-radius: 10px;
+  background: var(--color-body);
+}
+
+.page-content.cx-auth form.ui.form .help { margin-inline-start: 0 !important; }
+
+.page-content.cx-auth form.ui.form .ui.primary.button {
+  min-height: 40px;
+  border-radius: 10px;
+}
+
+.page-content.cx-auth .divider.divider-text {
+  margin: 18px 0 14px;
+  color: var(--color-text-light-3);
+  font: 500 0.66rem/1 var(--font-family-monospace);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.page-content.cx-auth #oauth2-login-navigator-inner {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px !important;
+}
+
+.page-content.cx-auth .oauth-login-link,
+.page-content.cx-auth #oauth2-login-navigator .ui.button {
+  gap: 8px;
+  min-height: 38px;
+  margin: 0 !important;
+  border: 1px solid var(--color-light-border);
+  border-radius: 999px;
+  background: var(--color-body);
+  color: var(--color-text);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.page-content.cx-auth #oauth2-login-navigator .ui.button svg,
+.page-content.cx-auth #oauth2-login-navigator .ui.button img {
+  width: 16px !important;
+  height: 16px !important;
+  margin: 0 !important;
+}
+
+/* Right side: dithered pixel Git tree with copy pinned to the bottom */
+.cx-auth__art {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background:
+    linear-gradient(to bottom, transparent 40%, color-mix(in srgb, var(--cognix-green) 8%, transparent)),
+    var(--cognix-surface);
+}
+
+.cx-auth__art .cx-gittree {
+  position: absolute;
+  inset: 0;
+}
+
+.cx-auth__art-copy {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 96px 32px 32px;
+  background: linear-gradient(to bottom, transparent, var(--cognix-surface) 38%);
+}
+
+.cx-auth__art-title {
+  margin: 14px 0 12px;
+  color: var(--color-text);
+  font-size: 2.1rem;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.cx-auth__art-title em {
+  color: var(--color-primary);
+  font-family: var(--cx-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.cx-auth__art-lede {
+  max-width: 360px;
+  margin: 0;
+  color: var(--color-text-light-2);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 860px) {
+  .cx-auth__shell { grid-template-columns: 1fr; width: min(100%, 440px); }
+  .cx-auth__art { display: none; }
+  .cx-auth__back { inset-inline-start: 20px; }
+}

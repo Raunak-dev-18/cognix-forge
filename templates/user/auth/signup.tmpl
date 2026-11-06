@@ -1,9 +1,16 @@
 {{template "base/head" .}}
-<div role="main" aria-label="{{.Title}}" class="page-content user signin{{if .LinkAccountMode}} icon{{end}}">
-	<div class="ui middle very relaxed page grid">
-		<div class="column tw-flex tw-flex-col tw-gap-4 tw-max-w-2xl tw-m-auto">
+<div role="main" aria-label="{{.Title}}" class="page-content user signin cx-auth cx-auth--signup{{if .LinkAccountMode}} icon{{end}}">
+	<a class="cx-auth__back" href="{{AppSubUrl}}/">{{svg "octicon-arrow-left" 14}} {{AppName}}</a>
+	<div class="cx-auth__shell">
+		<div class="cx-auth__panel">
+			<div class="cx-auth__head">
+				<span class="cx-auth__logo"><img width="28" height="28" src="{{AssetUrlPrefix}}/img/logo.svg?v={{AssetVersion}}" alt=""></span>
+				<h1>Create your account</h1>
+				<p>Get started in a few seconds — it's free.</p>
+			</div>
 			{{template "user/auth/signup_inner" .}}
 		</div>
+		{{template "user/auth/auth_shell_art" .}}
 	</div>
 </div>
 {{template "base/footer" .}}

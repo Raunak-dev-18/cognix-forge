@@ -80,6 +80,7 @@ import {initGlobalTooltips} from './modules/tippy.js';
 import {initDropdowns} from './modules/dropdown.ts';
 import {initGiteaFomantic} from './modules/fomantic.js';
 import {onDomReady} from './utils/dom.ts';
+import {initCognixGitTree, initNavbarSearchShortcut} from './features/cognix-git-tree.ts';
 import {initRepoIssueList} from './features/repo-issue-list.js';
 import {initCommonIssueListQuickGoto} from './features/common-issue-list.js';
 import {initRepoContributors} from './features/contributors.js';
@@ -125,6 +126,8 @@ onDomReady(() => {
   initInstall();
 
   initHeadNavbarContentToggle();
+  initNavbarSearchShortcut();
+  initCognixGitTree();
   initFootLanguageMenu();
 
   initCommentContent();

@@ -1,26 +1,32 @@
 {{template "base/head" .}}
-<div role="main" aria-label="{{.Title}}" class="page-content repository new migrate">
-	<div class="ui container">
-		<h2 class="tw-mt-4">{{ctx.Locale.Tr "migrate.select.title"}}</h1>
+<div role="main" aria-label="{{.Title}}" class="page-content repository new migrate cx-form-page cx-migrate-select">
+	<div class="cx-form-wrap cx-form-wrap--wide">
+		<header class="cx-form-head">
+			<span class="cx-form-head__icon" aria-hidden="true">{{svg "octicon-repo-push" 20}}</span>
+			<div>
+				<p class="cx-eyebrow"><span class="cx-eyebrow__mark" aria-hidden="true">✳</span> {{AppName}}</p>
+				<h1>{{ctx.Locale.Tr "migrate.select.title"}}</h1>
+				<p class="cx-form-head__lede">Bring an existing project over — code, history and, where supported, issues, pull requests, releases and wikis. Pick where it lives today.</p>
+			</div>
+		</header>
 		{{template "repo/migrate/helper" .}}
-		<div class="migrate-entries">
+		<div class="migrate-entries cx-migrate-grid">
 			{{range .Services}}
-				<a class="migrate-entry tw-items-center" href="{{AppSubUrl}}/repo/migrate?service_type={{.}}&org={{$.Org}}&mirror={{$.Mirror}}">
+				<a class="migrate-entry cx-migrate-card" href="{{AppSubUrl}}/repo/migrate?service_type={{.}}&org={{$.Org}}&mirror={{$.Mirror}}">
+					<span class="cx-migrate-card__icon" aria-hidden="true">
 					{{if eq .Name "github"}}
-						{{svg "octicon-mark-github" 184}}
+						{{svg "octicon-mark-github" 28}}
 					{{else if eq .Name "bitbucketdc"}}
-						{{svg "bitbucketdc" 184}}
+						{{svg "bitbucketdc" 28}}
 					{{else}}
-						{{svg (printf "gitea-%s" .Name) 184}}
+						{{svg (printf "gitea-%s" .Name) 28}}
 					{{end}}
-					<div class="content">
-						<h3>
-							{{.Title}}
-						</h3>
-						<div class="description">
-							{{ctx.Locale.Tr (printf "migrate.%s.description" .Name)}}
-						</div>
-					</div>
+					</span>
+					<span class="content">
+						<span class="cx-migrate-card__title">{{.Title}}</span>
+						<span class="description">{{ctx.Locale.Tr (printf "migrate.%s.description" .Name)}}</span>
+					</span>
+					<span class="cx-migrate-card__arrow" aria-hidden="true">{{svg "octicon-arrow-right" 16}}</span>
 				</a>
 			{{end}}
 		</div>

@@ -1,5 +1,6 @@
 {{template "base/head" .}}
 <div role="main" aria-label="{{.Title}}" class="page-content user profile">
+	<div class="secondary-nav cx-profile-nav"><div class="ui container">{{template "user/overview/header" .}}</div></div>
 	<div class="ui container">
 		{{template "base/alert" .}}
 		<div class="ui stackable grid">
@@ -7,7 +8,6 @@
 				{{template "shared/user/profile_big_avatar" .}}
 			</div>
 			<div class="ui twelve wide column tw-mb-4">
-				{{template "user/overview/header" .}}
 				{{if eq .TabName "activity"}}
 					{{if eq .SignedUserID .ContextUser.ID}}
 					<p id="visibility-hint">
@@ -51,13 +51,50 @@
 				{{else if eq .TabName "followers"}}
 					{{template "repo/user_cards" .}}
 				{{else if eq .TabName "overview"}}
-					<div id="readme_profile" class="{{if not .IsProfileReadmePlain}}markup{{end}}">
+					{{if .ProfileReadme}}
+					<div id="readme_profile" class="cx-profile-readme {{if not .IsProfileReadmePlain}}markup{{end}}">
 					{{if .IsProfileReadmePlain}}
 						<pre>{{.ProfileReadme}}</pre>
 					{{else}}
 						{{.ProfileReadme}}
 					{{end}}
 					</div>
+					{{end}}
+					{{if .PopularRepos}}
+					<section class="cx-profile-block" aria-labelledby="popular-repos-title">
+						<div class="cx-profile-block__head">
+							<h2 id="popular-repos-title">{{if .ProfileReadme}}{{ctx.Locale.Tr "user.repositories"}}{{else}}Popular repositories{{end}}</h2>
+							<a href="{{.ContextUser.HomeLink}}?tab=repositories">View all {{svg "octicon-arrow-right" 14}}</a>
+						</div>
+						<div class="cx-pin-grid">
+							{{range .PopularRepos}}
+							<article class="cx-pin">
+								<div class="cx-pin__title">
+									{{if .IsPrivate}}{{svg "octicon-lock" 16}}{{else}}{{svg "octicon-repo" 16}}{{end}}
+									<a href="{{.Link}}">{{.Name}}</a>
+									<span class="cx-pill">{{if .IsPrivate}}{{ctx.Locale.Tr "repo.desc.private"}}{{else}}{{ctx.Locale.Tr "filter.public"}}{{end}}</span>
+								</div>
+								<p class="cx-pin__desc">{{if .Description}}{{.Description}}{{else}}<span class="cx-muted">{{ctx.Locale.Tr "repo.no_desc"}}</span>{{end}}</p>
+								<div class="cx-pin__meta">
+									{{if .IsFork}}<span>{{svg "octicon-repo-forked" 14}} {{ctx.Locale.Tr "repo.fork"}}</span>{{end}}
+									<a class="muted" href="{{.Link}}/stars">{{svg "octicon-star" 14}} {{.NumStars}}</a>
+									{{if .NumForks}}<a class="muted" href="{{.Link}}/forks">{{svg "octicon-repo-forked" 14}} {{.NumForks}}</a>{{end}}
+								</div>
+							</article>
+							{{end}}
+						</div>
+					</section>
+					{{end}}
+					{{if or .IsAdmin (eq .SignedUserID .ContextUser.ID) (not .ContextUser.KeepActivityPrivate)}}
+					<section class="cx-profile-block" aria-label="{{ctx.Locale.Tr "user.activity"}}">
+						{{template "user/heatmap" .}}
+						{{if .Feeds}}
+						<div class="cx-profile-block__head"><h2>{{ctx.Locale.Tr "user.activity"}}</h2></div>
+						{{template "user/dashboard/feeds" .}}
+						{{template "base/paginate" .}}
+						{{end}}
+					</section>
+					{{end}}
 				{{else if and FederationEnabled (eq .TabName "feed")}}
 					{{if eq .SignedUserID .ContextUser.ID}}
 						{{if .FollowingFeeds}}

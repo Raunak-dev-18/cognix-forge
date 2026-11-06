@@ -1,28 +1,71 @@
 {{if not .IsSigned}}
-<section class="cognix-home-features" aria-label="What you can do">
-	<div class="cognix-home-features__heading">
-		<p class="cognix-home-eyebrow">{{svg "octicon-asterisk" 16}} Made for the way you build</p>
-		<h2>Everything in its <em>right place.</em></h2>
+<section class="cx-features" aria-labelledby="features-title">
+	<header class="cx-section-head">
+		<p class="cx-eyebrow"><span class="cx-eyebrow__mark" aria-hidden="true">✳</span> Everything in one place</p>
+		<h2 id="features-title">From first commit<br><em>to production.</em></h2>
+	</header>
+
+	<div class="cx-bento">
+		<article class="cx-tile cx-tile--wide">
+			<div class="cx-tile__head">
+				<span class="cx-tile__num">01</span>
+				<span class="cx-tile__icon">{{svg "octicon-git-pull-request" 16}}</span>
+			</div>
+			<h3>Review changes where they happen</h3>
+			<p>Pull requests with line comments, suggestions and protected branches — so every merge is a conversation, not a surprise.</p>
+			<div class="cx-diff" aria-hidden="true">
+				<div class="cx-diff__line cx-diff__line--del"><span>−</span><code>return render(tree)</code></div>
+				<div class="cx-diff__line cx-diff__line--add"><span>+</span><code>return render(dither(tree, 8))</code></div>
+				<div class="cx-diff__comment"><span class="cx-dot"></span>Looks great — ship it.</div>
+			</div>
+		</article>
+
+		<article class="cx-tile">
+			<div class="cx-tile__head">
+				<span class="cx-tile__num">02</span>
+				<span class="cx-tile__icon">{{svg "octicon-issue-opened" 16}}</span>
+			</div>
+			<h3>Plan with issues</h3>
+			<p>Labels, milestones and project boards that stay linked to the code.</p>
+			<a class="cx-tile__link" href="{{AppSubUrl}}/explore/repos">Browse projects <span aria-hidden="true">→</span></a>
+		</article>
+
+		<article class="cx-tile">
+			<div class="cx-tile__head">
+				<span class="cx-tile__num">03</span>
+				<span class="cx-tile__icon">{{svg "octicon-play" 16}}</span>
+			</div>
+			<h3>Automate with Actions</h3>
+			<div class="cx-pipeline" aria-hidden="true">
+				<div><span class="cx-pipeline__ok">{{svg "octicon-check-circle-fill" 14}}</span><code>lint</code><span class="cx-pipeline__t">12s</span></div>
+				<div><span class="cx-pipeline__ok">{{svg "octicon-check-circle-fill" 14}}</span><code>test</code><span class="cx-pipeline__t">48s</span></div>
+				<div><span class="cx-pipeline__run"></span><code>deploy</code><span class="cx-pipeline__t">running</span></div>
+			</div>
+		</article>
+
+		<article class="cx-tile cx-tile--wide cx-tile--ink">
+			<div class="cx-tile__head">
+				<span class="cx-tile__num">04</span>
+				<span class="cx-tile__icon">{{svg "octicon-package" 16}}</span>
+			</div>
+			<h3>Ship packages, releases and docs</h3>
+			<p>Container images, npm, PyPI, Cargo and more — published next to the repository that built them, with wikis and releases alongside.</p>
+			<div class="cx-tags" aria-hidden="true">
+				<span>container</span><span>npm</span><span>pypi</span><span>cargo</span><span>maven</span><span>go</span>
+			</div>
+		</article>
 	</div>
-	<div class="cognix-home-feature-grid">
-		<article class="cognix-home-feature">
-			<span class="cognix-home-feature__icon">{{svg "octicon-code" 18}}</span>
-			<h3>Your code, together</h3>
-			<p>Keep repositories close to the people building them. Review changes and keep the work moving.</p>
-			<a href="{{AppSubUrl}}/explore/repos">Explore repositories <span aria-hidden="true">→</span></a>
-		</article>
-		<article class="cognix-home-feature">
-			<span class="cognix-home-feature__icon">{{svg "octicon-git-pull-request" 18}}</span>
-			<h3>Changes with context</h3>
-			<p>Discuss code where it changes, with issues and pull requests connected to the work.</p>
-			<a href="{{AppSubUrl}}/explore/repos">See what’s happening <span aria-hidden="true">→</span></a>
-		</article>
-		<article class="cognix-home-feature">
-			<span class="cognix-home-feature__icon">{{svg "octicon-workflow" 18}}</span>
-			<h3>Automation close by</h3>
-			<p>Run workflows alongside your repositories with built-in, Actions-compatible CI/CD.</p>
-			<a href="{{AppSubUrl}}/user/login">Get started <span aria-hidden="true">→</span></a>
-		</article>
+</section>
+
+<section class="cx-cta" aria-labelledby="cta-title">
+	<div class="cx-cta__inner">
+		<h2 id="cta-title">Your next repository<br><em>starts here.</em></h2>
+		<div class="cx-hero__actions">
+			{{if .ShowRegistrationButton}}
+			<a class="ui primary button cx-btn-lg" href="{{AppSubUrl}}/user/sign_up">Get started <span aria-hidden="true">→</span></a>
+			{{end}}
+			<a class="ui basic button cx-btn-lg" href="{{AppSubUrl}}/user/login">{{ctx.Locale.Tr "sign_in"}}</a>
+		</div>
 	</div>
 </section>
 {{end}}

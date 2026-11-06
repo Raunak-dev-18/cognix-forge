@@ -95,16 +95,84 @@ func prepareUserProfileFunding(ctx *context.Context, profileFunding *funding_ser
 	ctx.Data["FundingTarget"] = ctx.ContextUser.DisplayName()
 }
 
-func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDbRepo *repo_model.Repository, profileGitRepo *git.Repository, profileReadme *git.Blob) {
-	// if there is a profile readme, default to "overview" page, otherwise, default to "repositories" page
-	// if there is not a profile readme, the overview tab should be treated as the repositories tab
-	tab := ctx.FormString("tab")
-	if tab == "" || tab == "overview" {
-		if profileReadme != nil {
-			tab = "overview"
+// renderProfileReadme renders the profile README into ctx.Data["ProfileReadme"].
+func renderProfileReadme(ctx *context.Context, profileDbRepo *repo_model.Repository, profileGitRepo *git.Repository, profileReadme *git.Blob) {
+	if rc, _, err := profileReadme.NewTruncatedReader(setting.UI.MaxDisplayFileSize); err != nil {
+		log.Error("failed to NewTruncatedReader: %v", err)
+	} else {
+		defer rc.Close()
+
+		if markupType := markup.Type(profileReadme.Name()); markupType != "" {
+			if profileContent, err := markdown.RenderReader(&markup.RenderContext{
+				Ctx:     ctx,
+				Type:    markupType,
+				GitRepo: profileGitRepo,
+				Links: markup.Links{
+					// Give the repo link to the markdown render for the full link of media element.
+					// the media link usually be like /[user]/[repoName]/media/branch/[branchName],
+					// 	Eg. /Tom/.profile/media/branch/main
+					// The branch shown on the profile page is the default branch, this need to be in sync with doc, see:
+					//	https://docs.gitea.com/usage/profile-readme
+					Base:       profileDbRepo.Link(),
+					BranchPath: path.Join("branch", util.PathEscapeSegments(profileDbRepo.DefaultBranch)),
+				},
+				Metas: map[string]string{"mode": "document"},
+			}, rc); err != nil {
+				log.Error("failed to RenderString: %v", err)
+			} else {
+				ctx.Data["ProfileReadme"] = profileContent
+			}
 		} else {
-			tab = "repositories"
+			content, err := io.ReadAll(rc)
+			if err != nil {
+				log.Error("Read readme content failed: %v", err)
+			}
+			ctx.Data["ProfileReadme"] = gotemplate.HTMLEscapeString(util.UnsafeBytesToString(content))
+			ctx.Data["IsProfileReadmePlain"] = true
 		}
+	}
+}
+
+// loadProfileActivity loads the contribution heatmap and one page of the activity feed of the
+// profile user. It returns the total number of feed items, and false if an error response was written.
+func loadProfileActivity(ctx *context.Context, showPrivate bool, page int) (int, bool) {
+	if setting.Service.EnableUserHeatmap {
+		data, err := activities_model.GetUserHeatmapDataByUser(ctx, ctx.ContextUser, ctx.Doer)
+		if err != nil {
+			ctx.ServerError("GetUserHeatmapDataByUser", err)
+			return 0, false
+		}
+		ctx.Data["HeatmapData"] = data
+		ctx.Data["HeatmapTotalContributions"] = activities_model.GetTotalContributionsInHeatmap(data)
+	}
+
+	date := ctx.FormString("date")
+	items, count, err := activities_model.GetFeeds(ctx, activities_model.GetFeedsOptions{
+		RequestedUser:   ctx.ContextUser,
+		Actor:           ctx.Doer,
+		IncludePrivate:  showPrivate,
+		OnlyPerformedBy: true,
+		Date:            date,
+		ListOptions: db.ListOptions{
+			PageSize: setting.UI.FeedPagingNum,
+			Page:     page,
+		},
+	})
+	if err != nil {
+		ctx.ServerError("GetFeeds", err)
+		return 0, false
+	}
+	ctx.Data["Feeds"] = items
+	ctx.Data["Date"] = date
+	return int(count), true
+}
+
+func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDbRepo *repo_model.Repository, profileGitRepo *git.Repository, profileReadme *git.Blob) {
+	// The "overview" tab is the default: profile README (if any), popular repositories,
+	// contribution heatmap and recent activity, like a GitHub profile.
+	tab := ctx.FormString("tab")
+	if tab == "" {
+		tab = "overview"
 	}
 	ctx.Data["TabName"] = tab
 	ctx.Data["HasProfileReadme"] = profileReadme != nil
@@ -212,38 +280,11 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 			total = int(count)
 		}
 	case "activity":
-		// prepare heatmap data
-		if setting.Service.EnableUserHeatmap {
-			data, err := activities_model.GetUserHeatmapDataByUser(ctx, ctx.ContextUser, ctx.Doer)
-			if err != nil {
-				ctx.ServerError("GetUserHeatmapDataByUser", err)
-				return
-			}
-			ctx.Data["HeatmapData"] = data
-			ctx.Data["HeatmapTotalContributions"] = activities_model.GetTotalContributionsInHeatmap(data)
-		}
-
-		date := ctx.FormString("date")
 		pagingNum = setting.UI.FeedPagingNum
-		items, count, err := activities_model.GetFeeds(ctx, activities_model.GetFeedsOptions{
-			RequestedUser:   ctx.ContextUser,
-			Actor:           ctx.Doer,
-			IncludePrivate:  showPrivate,
-			OnlyPerformedBy: true,
-			Date:            date,
-			ListOptions: db.ListOptions{
-				PageSize: pagingNum,
-				Page:     page,
-			},
-		})
-		if err != nil {
-			ctx.ServerError("GetFeeds", err)
+		var ok bool
+		if total, ok = loadProfileActivity(ctx, showPrivate, page); !ok {
 			return
 		}
-		ctx.Data["Feeds"] = items
-		ctx.Data["Date"] = date
-
-		total = int(count)
 	case "stars":
 		ctx.Data["PageIsProfileStarList"] = true
 		repos, count, err = repo_model.SearchRepository(ctx, &repo_model.SearchRepoOptions{
@@ -300,38 +341,35 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 
 		total = int(count)
 	case "overview":
-		if rc, _, err := profileReadme.NewTruncatedReader(setting.UI.MaxDisplayFileSize); err != nil {
-			log.Error("failed to NewTruncatedReader: %v", err)
-		} else {
-			defer rc.Close()
+		if profileReadme != nil {
+			renderProfileReadme(ctx, profileDbRepo, profileGitRepo, profileReadme)
+		}
 
-			if markupType := markup.Type(profileReadme.Name()); markupType != "" {
-				if profileContent, err := markdown.RenderReader(&markup.RenderContext{
-					Ctx:     ctx,
-					Type:    markupType,
-					GitRepo: profileGitRepo,
-					Links: markup.Links{
-						// Give the repo link to the markdown render for the full link of media element.
-						// the media link usually be like /[user]/[repoName]/media/branch/[branchName],
-						// 	Eg. /Tom/.profile/media/branch/main
-						// The branch shown on the profile page is the default branch, this need to be in sync with doc, see:
-						//	https://docs.gitea.com/usage/profile-readme
-						Base:       profileDbRepo.Link(),
-						BranchPath: path.Join("branch", util.PathEscapeSegments(profileDbRepo.DefaultBranch)),
-					},
-					Metas: map[string]string{"mode": "document"},
-				}, rc); err != nil {
-					log.Error("failed to RenderString: %v", err)
-				} else {
-					ctx.Data["ProfileReadme"] = profileContent
-				}
-			} else {
-				content, err := io.ReadAll(rc)
-				if err != nil {
-					log.Error("Read readme content failed: %v", err)
-				}
-				ctx.Data["ProfileReadme"] = gotemplate.HTMLEscapeString(util.UnsafeBytesToString(content))
-				ctx.Data["IsProfileReadmePlain"] = true
+		// Popular repositories stand in for GitHub's pinned repositories.
+		popularRepos, _, err := repo_model.SearchRepository(ctx, &repo_model.SearchRepoOptions{
+			ListOptions: db.ListOptions{
+				PageSize: 6,
+				Page:     1,
+			},
+			Actor:       ctx.Doer,
+			OwnerID:     ctx.ContextUser.ID,
+			OrderBy:     db.SearchOrderByStarsReverse,
+			Private:     ctx.IsSigned,
+			Collaborate: optional.Some(false),
+			Archived:    optional.Some(false),
+		})
+		if err != nil {
+			ctx.ServerError("SearchRepository", err)
+			return
+		}
+		ctx.Data["PopularRepos"] = popularRepos
+
+		canSeeActivity := showPrivate || !ctx.ContextUser.KeepActivityPrivate
+		if canSeeActivity {
+			pagingNum = setting.UI.FeedPagingNum
+			var ok bool
+			if total, ok = loadProfileActivity(ctx, showPrivate, page); !ok {
+				return
 			}
 		}
 	default: // default to "repositories"
@@ -377,7 +415,7 @@ func prepareUserProfileTabData(ctx *context.Context, showPrivate bool, profileDb
 	if tab != "followers" && tab != "following" && tab != "activity" && tab != "projects" {
 		pager.AddParam(ctx, "language", "Language")
 	}
-	if tab == "activity" {
+	if tab == "activity" || tab == "overview" {
 		pager.AddParam(ctx, "date", "Date")
 	}
 	if has, value := archived.Get(); has {

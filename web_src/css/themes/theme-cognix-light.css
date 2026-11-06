@@ -1,8 +1,10 @@
-@import "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap";
+@import "https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Instrument+Serif:ital@0;1&display=swap";
 @import "../chroma/light.css";
 @import "../codemirror/light.css";
 @import "../markup/light.css";
 @import "../cognix-brand.css";
+@import "../cognix-shell.css";
+@import "../cognix-pages.css";
 
 :root {
   --is-dark-theme: false;
@@ -244,8 +246,8 @@
   --color-reaction-active-bg: var(--color-primary-light-6);
   --color-tooltip-text: #f2efe9;
   --color-tooltip-bg: #121212f0;
-  --color-nav-bg: #121212;
-  --color-nav-hover-bg: #2c2c2a;
+  --color-nav-bg: #f5f5f3;
+  --color-nav-hover-bg: #e8e8e5;
   --color-secondary-nav-bg: #f2f2f0;
   --color-label-text: var(--color-text);
   --color-label-bg: #12121214;
@@ -295,26 +297,6 @@ h1, h2, h3, h4 {
 :focus-visible {
   outline: 2px solid var(--cognix-ink);
   outline-offset: 2px;
-}
-
-/* GitHub-style ink navbar in the light tone: scope light text to the navbar */
-#navbar {
-  --color-text: #f2efe9;
-  --color-text-dark: #f2efe9;
-  --color-text-light: #d5d2ca;
-  --color-text-light-1: #b5b2aa;
-  --color-text-light-2: #a3a09a;
-  --color-placeholder-text: #84817a;
-  --color-hover: #f2efe91a;
-  --color-active: #f2efe926;
-  --color-light-border: #f2efe91f;
-}
-
-/* menus opened from the navbar return to the light surface */
-#navbar .ui.dropdown .menu,
-#navbar .menu {
-  --color-text: #121212;
-  --color-text-dark: #121212;
 }
 
 /* Cognix dither bands: footer ground and home hero sky */

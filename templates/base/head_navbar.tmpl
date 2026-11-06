@@ -7,7 +7,8 @@
 	<div class="navbar-left ui secondary menu">
 		<!-- the logo -->
 		<a class="item" id="navbar-logo" href="{{AppSubUrl}}/" aria-label="{{if .IsSigned}}{{ctx.Locale.Tr "dashboard"}}{{else}}{{ctx.Locale.Tr "home"}}{{end}}">
-			<img width="30" height="30" src="{{AssetUrlPrefix}}/img/logo.svg?v={{AssetVersion}}" alt="{{ctx.Locale.Tr "logo"}}" aria-hidden="true">
+			<img width="26" height="26" src="{{AssetUrlPrefix}}/img/logo.svg?v={{AssetVersion}}" alt="{{ctx.Locale.Tr "logo"}}" aria-hidden="true">
+			<span class="cx-wordmark not-mobile">{{AppName}}</span>
 		</a>
 
 		<!-- mobile right menu, it must be here because in mobile view, each item is a flex column, the first item is a full row column -->
@@ -47,13 +48,17 @@
 
 		{{template "custom/extra_links" .}}
 
-		{{if not .IsSigned}}
-			<a class="item" target="_blank" rel="noopener noreferrer" href="{{AppDocsURL "/"}}">{{ctx.Locale.Tr "help"}}</a>
-		{{end}}
 	</div>
 
 	{{/* Various dropdowns on the left side of the navbar */}}
 	<div class="navbar-right ui secondary menu">
+		{{if not (and .IsSigned .HideNavbarLinks)}}
+		<form class="cx-nav-search item not-mobile" action="{{AppSubUrl}}/explore/repos" method="get" role="search">
+			{{svg "octicon-search" 14}}
+			<input type="search" name="q" placeholder="{{ctx.Locale.Tr "search.search"}}" aria-label="{{ctx.Locale.Tr "search.search"}}" autocomplete="off">
+			<kbd aria-hidden="true">/</kbd>
+		</form>
+		{{end}}
 		{{if .IsSigned}}
 			<form id="logout-user-action" action="{{AppSubUrl}}/user/logout" method="POST" class="tw-hidden"></form>
 		{{end}}
@@ -192,12 +197,6 @@
 								{{ctx.Locale.Tr "your_settings"}}
 							</a>
 						</li>
-						<li>
-							<a target="_blank" rel="noopener noreferrer" href="{{AppDocsURL "/"}}">
-								{{svg "octicon-question"}}
-								{{ctx.Locale.Tr "help"}}
-							</a>
-						</li>
 						{{$showDemo := not .RunModeIsProd}}
 						{{if or .IsAdmin $showDemo}}
 							<hr>
@@ -229,16 +228,14 @@
 				</dialog>
 			</div>
 		{{else}}
+			<a class="item cx-nav-signin{{if .PageIsSignIn}} active{{end}}" rel="nofollow" href="{{AppSubUrl}}/user/login{{if not .PageIsSignIn}}?redirect_to={{.CurrentURL}}{{end}}">
+				{{ctx.Locale.Tr "sign_in"}}
+			</a>
 			{{if .ShowRegistrationButton}}
-				<a class="item{{if .PageIsSignUp}} active{{end}}" href="{{AppSubUrl}}/user/sign_up">
-					{{svg "octicon-person" 16 "tw-mr-1"}}
-					<span>{{ctx.Locale.Tr "register"}}</span>
+				<a class="item cx-nav-signup{{if .PageIsSignUp}} active{{end}}" href="{{AppSubUrl}}/user/sign_up">
+					{{ctx.Locale.Tr "sign_up"}}
 				</a>
 			{{end}}
-			<a class="item{{if .PageIsSignIn}} active{{end}}" rel="nofollow" href="{{AppSubUrl}}/user/login{{if not .PageIsSignIn}}?redirect_to={{.CurrentURL}}{{end}}">
-				{{svg "octicon-sign-in" 16 "tw-mr-1"}}
-				<span>{{ctx.Locale.Tr "sign_in"}}</span>
-			</a>
 		{{end}}
 	</div><!-- end full right menu -->
 </nav>

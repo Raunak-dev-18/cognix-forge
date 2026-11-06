@@ -1,14 +1,31 @@
 {{template "base/head" .}}
-<main role="main" aria-label="{{if .IsSigned}}{{ctx.Locale.Tr "dashboard"}}{{else}}{{ctx.Locale.Tr "home"}}{{end}}" class="page-content home">
+<main role="main" aria-label="{{if .IsSigned}}{{ctx.Locale.Tr "dashboard"}}{{else}}{{ctx.Locale.Tr "home"}}{{end}}" class="page-content home cx-landing">
 	{{if not .IsSigned}}
-	<section class="cognix-home-hero" aria-labelledby="home-title">
-		<div class="cognix-home-hero__inner">
-			<p class="cognix-home-eyebrow">{{svg "octicon-asterisk" 16}} A home for your code</p>
-			<h1 id="home-title">Build Together.<br><em>Ship With Confidence.</em></h1>
-			<p class="cognix-home-lede">{{ctx.Locale.Tr "startpage.app_desc"}}</p>
-			<div class="cognix-home-actions">
-				<a class="ui primary button" href="{{AppSubUrl}}/user/sign_up">{{ctx.Locale.Tr "sign_up"}}</a>
-				<a class="ui basic button" href="{{AppSubUrl}}/user/login">{{ctx.Locale.Tr "sign_in"}}</a>
+	<section class="cx-hero" aria-labelledby="home-title">
+		<div class="cx-hero__copy">
+			<p class="cx-eyebrow"><span class="cx-eyebrow__mark" aria-hidden="true">✳</span> {{AppName}} · Git hosting</p>
+			<h1 id="home-title">Branch boldly.<br><em>Merge with calm.</em></h1>
+			<p class="cx-hero__lede">{{ctx.Locale.Tr "startpage.app_desc"}}</p>
+			<div class="cx-hero__actions">
+				{{if .ShowRegistrationButton}}
+				<a class="ui primary button cx-btn-lg" href="{{AppSubUrl}}/user/sign_up">Create your account <span aria-hidden="true">→</span></a>
+				{{else}}
+				<a class="ui primary button cx-btn-lg" href="{{AppSubUrl}}/user/login">{{ctx.Locale.Tr "sign_in"}} <span aria-hidden="true">→</span></a>
+				{{end}}
+				<a class="ui basic button cx-btn-lg" href="{{AppSubUrl}}/explore/repos">{{ctx.Locale.Tr "explore"}}</a>
+			</div>
+			<div class="cx-clone" role="group" aria-label="Push an existing project">
+				<span class="cx-clone__prompt" aria-hidden="true">$</span>
+				<code>git remote add origin {{AppUrl}}you/project.git</code>
+			</div>
+		</div>
+		<div class="cx-hero__art" aria-hidden="true">
+			<canvas class="cx-gittree" data-git-tree data-git-tree-align="center"></canvas>
+			<div class="cx-hero__chip cx-hero__chip--top">
+				<span class="cx-dot"></span><code>HEAD → main</code>
+			</div>
+			<div class="cx-hero__chip cx-hero__chip--bottom">
+				<code>a1f9e2c</code><span>Merge branch <b>feat/pixel-tree</b></span>
 			</div>
 		</div>
 	</section>

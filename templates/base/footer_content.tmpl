@@ -1,7 +1,7 @@
 <footer class="page-footer" role="group" aria-label="{{ctx.Locale.Tr "aria.footer"}}">
 	<div class="left-links" role="contentinfo" aria-label="{{ctx.Locale.Tr "aria.footer.software"}}">
 		{{if ShowFooterPoweredBy}}
-			<a target="_blank" rel="noopener noreferrer" href="https://forgejo.org">{{ctx.Locale.Tr "powered_by" "GitCode"}}</a>
+			<a href="{{AppSubUrl}}/">{{ctx.Locale.Tr "powered_by" "GitCode"}}</a>
 		{{end}}
 		{{if (or .ShowFooterVersion .PageIsAdmin)}}
 			{{ctx.Locale.Tr "version"}}:
