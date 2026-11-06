@@ -8,6 +8,12 @@
 					{{AppDisplayName}}
 				</h1>
 				<h2>{{ctx.Locale.Tr "startpage.app_desc"}}</h2>
+				{{if not .IsSigned}}
+				<div class="tw-mt-5 tw-flex tw-gap-3 tw-justify-center">
+					<a class="ui primary button" href="{{AppSubUrl}}/user/sign_up">{{ctx.Locale.Tr "sign_up"}}</a>
+					<a class="ui basic button" href="{{AppSubUrl}}/user/login">{{ctx.Locale.Tr "sign_in"}}</a>
+				</div>
+				{{end}}
 			</div>
 		</div>
 	</div>

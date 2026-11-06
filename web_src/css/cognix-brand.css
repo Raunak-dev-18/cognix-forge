@@ -279,3 +279,42 @@ dialog.modal header {
 .ui.secondary.pointing.menu .active.item:focus {
   box-shadow: inset 0 -2px 0 var(--color-primary);
 }
+
+/* ---------- Brand motion ----------
+   One entrance moment on the home hero; quiet everywhere else.
+   Respects prefers-reduced-motion. */
+
+@keyframes cognix-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .page-content.home .center > .logo {
+    animation: cognix-reveal 600ms var(--ease) both;
+  }
+
+  .page-content.home .hero {
+    animation: cognix-reveal 600ms var(--ease) 90ms both;
+  }
+
+  .page-content.home .ui.page.grid .column {
+    animation: cognix-reveal 600ms var(--ease) 180ms both;
+  }
+
+  #navbar-logo img {
+    transition: transform 300ms var(--ease);
+  }
+
+  #navbar-logo:hover img {
+    transform: scale(1.06);
+  }
+}
