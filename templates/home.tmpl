@@ -1,22 +1,18 @@
 {{template "base/head" .}}
-<div role="main" aria-label="{{if .IsSigned}}{{ctx.Locale.Tr "dashboard"}}{{else}}{{ctx.Locale.Tr "home"}}{{end}}" class="page-content home">
-	<div class="tw-mb-8 tw-px-8">
-		<div class="center">
-			<img class="logo" width="220" height="220" src="{{AssetUrlPrefix}}/img/logo.svg?v={{AssetVersion}}" alt="{{ctx.Locale.Tr "logo"}}">
-			<div class="hero">
-				<h1 class="ui icon header title">
-					{{AppDisplayName}}
-				</h1>
-				<h2>{{ctx.Locale.Tr "startpage.app_desc"}}</h2>
-				{{if not .IsSigned}}
-				<div class="tw-mt-5 tw-flex tw-gap-3 tw-justify-center">
-					<a class="ui primary button" href="{{AppSubUrl}}/user/sign_up">{{ctx.Locale.Tr "sign_up"}}</a>
-					<a class="ui basic button" href="{{AppSubUrl}}/user/login">{{ctx.Locale.Tr "sign_in"}}</a>
-				</div>
-				{{end}}
+<main role="main" aria-label="{{if .IsSigned}}{{ctx.Locale.Tr "dashboard"}}{{else}}{{ctx.Locale.Tr "home"}}{{end}}" class="page-content home">
+	{{if not .IsSigned}}
+	<section class="cognix-home-hero" aria-labelledby="home-title">
+		<div class="cognix-home-hero__inner">
+			<p class="cognix-home-eyebrow">{{svg "octicon-asterisk" 16}} A home for your code</p>
+			<h1 id="home-title">Build Together.<br><em>Ship With Confidence.</em></h1>
+			<p class="cognix-home-lede">{{ctx.Locale.Tr "startpage.app_desc"}}</p>
+			<div class="cognix-home-actions">
+				<a class="ui primary button" href="{{AppSubUrl}}/user/sign_up">{{ctx.Locale.Tr "sign_up"}}</a>
+				<a class="ui basic button" href="{{AppSubUrl}}/user/login">{{ctx.Locale.Tr "sign_in"}}</a>
 			</div>
 		</div>
-	</div>
+	</section>
+	{{end}}
 	{{template "home_forgejo" .}}
-</div>
+</main>
 {{template "base/footer" .}}

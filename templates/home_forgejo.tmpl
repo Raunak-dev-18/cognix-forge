@@ -1,36 +1,28 @@
-	<div class="ui stackable middle very relaxed page grid">
-		<div class="eight wide center column">
-			<h1 class="hero ui icon header">
-				{{svg "octicon-flame"}} Fast by design
-			</h1>
-			<p class="large">
-				Cloning, browsing, and reviewing stay instant, even on modest hardware.
-			</p>
-		</div>
-		<div class="eight wide center column">
-			<h1 class="hero ui icon header">
-				{{svg "octicon-device-desktop"}} Self-hosted
-			</h1>
-			<p class="large">
-				Your repositories live on this server, under your control. No third-party lock-in.
-			</p>
-		</div>
+{{if not .IsSigned}}
+<section class="cognix-home-features" aria-label="What you can do">
+	<div class="cognix-home-features__heading">
+		<p class="cognix-home-eyebrow">{{svg "octicon-asterisk" 16}} Made for the way you build</p>
+		<h2>Everything in its <em>right place.</em></h2>
 	</div>
-	<div class="ui stackable middle very relaxed page grid">
-		<div class="eight wide center column">
-			<h1 class="hero ui icon header">
-				{{svg "octicon-rocket"}} Actions built in
-			</h1>
-			<p class="large">
-				CI/CD runs right next to your code with GitHub-Actions-compatible workflows.
-			</p>
-		</div>
-		<div class="eight wide center column">
-			<h1 class="hero ui icon header">
-				{{svg "octicon-code"}} Open source
-			</h1>
-			<p class="large">
-				GitCode is open source, built on the community-driven Forgejo project.
-			</p>
-		</div>
+	<div class="cognix-home-feature-grid">
+		<article class="cognix-home-feature">
+			<span class="cognix-home-feature__icon">{{svg "octicon-code" 18}}</span>
+			<h3>Your code, together</h3>
+			<p>Keep repositories close to the people building them. Review changes and keep the work moving.</p>
+			<a href="{{AppSubUrl}}/explore/repos">Explore repositories <span aria-hidden="true">→</span></a>
+		</article>
+		<article class="cognix-home-feature">
+			<span class="cognix-home-feature__icon">{{svg "octicon-git-pull-request" 18}}</span>
+			<h3>Changes with context</h3>
+			<p>Discuss code where it changes, with issues and pull requests connected to the work.</p>
+			<a href="{{AppSubUrl}}/explore/repos">See what’s happening <span aria-hidden="true">→</span></a>
+		</article>
+		<article class="cognix-home-feature">
+			<span class="cognix-home-feature__icon">{{svg "octicon-workflow" 18}}</span>
+			<h3>Automation close by</h3>
+			<p>Run workflows alongside your repositories with built-in, Actions-compatible CI/CD.</p>
+			<a href="{{AppSubUrl}}/user/login">Get started <span aria-hidden="true">→</span></a>
+		</article>
 	</div>
+</section>
+{{end}}

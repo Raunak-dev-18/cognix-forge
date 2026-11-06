@@ -246,15 +246,421 @@ dialog.modal header {
   box-shadow: 0 8px 24px var(--color-shadow) !important;
 }
 
+/* ---------- Shared application shell ---------- */
+body {
+  font-family: var(--font-family);
+  letter-spacing: -0.005em;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.page-content {
+  min-height: calc(100vh - 150px);
+}
+
+.page-content > .ui.container,
+.page-content > .ui.page.grid,
+.page-content > .ui.middle.page.grid {
+  width: min(100% - 32px, 1280px);
+}
+
+.ui.container,
+.ui.grid.container {
+  max-width: 1280px;
+}
+
+/* Content panels use quiet outlines and soft neutral depth across routes. */
+.ui.segment,
+.ui.segments,
+.ui.card,
+.ui.cards > .card,
+.ui.message,
+.ui.attached.segment {
+  border-color: var(--color-light-border);
+}
+
+.ui.segment:not(.basic):not(.inverted),
+.ui.attached.segment:not(.basic):not(.inverted) {
+  background-color: var(--color-card);
+}
+
+.ui.message {
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.ui.header,
+.page-title {
+  letter-spacing: -0.025em;
+}
+
+/* Inputs, selects, and editor controls share one accessible treatment. */
+input,
+textarea,
+select,
+.ui.input > input,
+.ui.selection.dropdown,
+.ui.form textarea,
+.ui.form input:not([type]),
+.ui.form input[type="text"],
+.ui.form input[type="email"],
+.ui.form input[type="password"],
+.ui.form input[type="url"] {
+  min-height: 36px;
+  border-color: var(--color-light-border);
+  background-color: var(--color-card);
+}
+
+.ui.form .field > label,
+.ui.form label {
+  font-weight: var(--font-weight-medium);
+}
+
+.ui.form .field .help,
+.ui.form .field .hint {
+  color: var(--color-text-light-2);
+}
+
+/* Auth: focused single-column surface, preserving every existing provider flow. */
+.user.signin .ui.middle.page.grid,
+.user.signup .ui.middle.page.grid,
+.user.forgot-password .ui.middle.page.grid,
+.user.reset-password .ui.middle.page.grid {
+  width: min(100% - 32px, 560px);
+  margin: 48px auto 80px;
+}
+
+.user.signin .ui.container.fluid > .ui.attached.segment,
+.user.signup .ui.container.fluid > .ui.attached.segment {
+  padding: 28px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 14px;
+  background: var(--color-card);
+  box-shadow: 0 8px 28px var(--cognix-shadow-card);
+}
+
+.user.signin .ui.container.fluid > .ui.top.attached.header,
+.user.signup .ui.container.fluid > .ui.top.attached.header {
+  margin-top: 0;
+  padding: 20px 24px;
+  border: 1px solid var(--color-light-border);
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
+  background: var(--color-card);
+}
+
+.user.signin h2,
+.user.signup h2,
+.user.signin h3,
+.user.signup h3 {
+  margin-top: 0;
+  font-weight: var(--font-weight-medium);
+}
+
+/* Repository pages: compact GitHub-like hierarchy and useful working density. */
+.repository .repo-header,
+.repository .repo-title,
+.repository .repo-title > .flex-item {
+  letter-spacing: -0.015em;
+}
+
+.repository .repo-header {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-light-border);
+}
+
+.repository .repo-description {
+  margin: 12px 0;
+  color: var(--color-text-light-2);
+}
+
+.repository .repo-topics .label,
+.repository .repo-topic {
+  border-radius: 999px;
+}
+
+.repository .repo-home-sidebar {
+  padding: 20px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 10px;
+  background: var(--color-card);
+}
+
+.repository .repo-button-row {
+  gap: 12px;
+  padding-block: 12px;
+}
+
+.repository .file-list,
+.repository .commit-list,
+.repository .ui.table,
+.repository .ui.table thead th {
+  border-color: var(--color-light-border);
+}
+
+.repository .ui.table thead th {
+  background: var(--color-box-header);
+  font-weight: var(--font-weight-medium);
+}
+
+.repository .file-list .item,
+.repository .commit-list .item {
+  border-color: var(--color-light-border);
+}
+
+/* Creation and settings forms: readable width, consistent field rhythm. */
+.repository.new.repo .ui.middle.page.grid,
+.repository.migrate .ui.middle.page.grid,
+.user.settings .ui.page.grid,
+.organization.settings .ui.page.grid {
+  width: min(100% - 32px, 960px);
+  margin-inline: auto;
+}
+
+.repository.new.repo form.ui.form,
+.repository.migrate form.ui.form {
+  max-width: 860px;
+  margin-inline: auto;
+}
+
+.repository.new.repo form > .ui.attached.segment,
+.repository.migrate form > .ui.attached.segment {
+  padding: clamp(18px, 4vw, 32px);
+}
+
+.repository.new.repo fieldset,
+.repository.migrate fieldset {
+  margin: 24px 0;
+  padding: 18px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 10px;
+}
+
+.repository.new.repo legend,
+.repository.migrate legend {
+  padding-inline: 8px;
+  font-weight: var(--font-weight-medium);
+}
+
+/* Shared list and dashboard surfaces. */
+.dashboard .ui.segment,
+.explore .ui.segment,
+.user.profile .ui.segment,
+.organization .ui.segment {
+  border-radius: 10px;
+}
+
+.ui.table td,
+.ui.table th {
+  border-color: var(--color-light-border);
+}
+
+.ui.tabular.menu,
+.ui.secondary.pointing.menu {
+  border-color: var(--color-light-border);
+}
+
+.ui.tabular.menu .active.item,
+.ui.secondary.pointing.menu .active.item {
+  color: var(--color-text);
+}
+
+@media (max-width: 767.98px) {
+  .page-content > .ui.container,
+  .page-content > .ui.page.grid,
+  .page-content > .ui.middle.page.grid {
+    width: calc(100% - 24px);
+  }
+
+  .user.signin .ui.container.fluid > .ui.attached.segment,
+  .user.signup .ui.container.fluid > .ui.attached.segment {
+    padding: 20px;
+  }
+
+  .repository .repo-button-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ---------- Navbar ----------
    Ground-toned bar with hairline rule and pill-shaped item hovers. */
 
 #navbar {
+  min-height: 56px;
+  padding-inline: max(16px, calc((100vw - 1280px) / 2));
   border-bottom: 1px solid var(--color-light-border);
+  background: var(--color-nav-bg);
 }
 
 #navbar .item {
   border-radius: 6px;
+}
+
+#navbar .navbar-left,
+#navbar .navbar-right {
+  min-height: 56px;
+  gap: 3px;
+}
+
+#navbar .navbar-left > .item,
+#navbar .navbar-right > .item,
+#navbar .dialog-dropdown > .opener {
+  color: var(--color-text);
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+}
+
+#navbar .navbar-left > a.item:not(#navbar-logo) {
+  padding-inline: 10px;
+}
+
+#navbar .navbar-left > a.item[aria-current="page"] {
+  background: var(--color-nav-hover-bg);
+}
+
+#navbar-logo {
+  margin-inline-end: 8px;
+}
+
+/* Section navigation follows GitHub's compact, horizontally scrollable tab bar. */
+overflow-menu.ui.menu,
+overflow-menu.ui.tabular.menu,
+overflow-menu.ui.secondary.menu {
+  min-height: 48px;
+  border-bottom: 1px solid var(--color-light-border) !important;
+  background: transparent !important;
+}
+
+overflow-menu .overflow-menu-items {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  min-height: 48px;
+}
+
+overflow-menu.ui.menu .item,
+overflow-menu.ui.menu a.item,
+overflow-menu.ui.menu .right.item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 48px;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--color-text-light-2);
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+overflow-menu.ui.menu .item:hover,
+overflow-menu.ui.menu a.item:hover {
+  color: var(--color-text);
+  background: transparent !important;
+}
+
+overflow-menu.ui.menu .item.active,
+overflow-menu.ui.menu a.item.active {
+  color: var(--color-text);
+  background: transparent !important;
+}
+
+overflow-menu.ui.menu .item.active::after,
+overflow-menu.ui.menu a.item.active::after {
+  position: absolute;
+  right: 8px;
+  bottom: -1px;
+  left: 8px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--color-primary);
+  content: "";
+}
+
+overflow-menu.ui.menu .item > .svg,
+overflow-menu.ui.menu a.item > .svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-light-2);
+}
+
+overflow-menu.ui.menu .item > .ui.label,
+overflow-menu.ui.menu a.item > .ui.label,
+overflow-menu.ui.menu .item > .small.label {
+  min-width: 20px;
+  margin: 0 0 0 2px;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-secondary);
+  color: var(--color-text-light-2);
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.secondary-nav {
+  border-bottom: 1px solid var(--color-light-border) !important;
+  background: var(--color-nav-bg) !important;
+}
+
+/* Settings menus use the same quiet active-state language as the top tabs. */
+.flex-container-nav .ui.vertical.menu {
+  padding: 8px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 10px;
+  background: var(--color-card);
+  box-shadow: none;
+}
+
+.flex-container-nav .ui.vertical.menu > .header.item {
+  padding: 10px 12px;
+  color: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: var(--font-weight-bold);
+}
+
+.flex-container-nav .ui.vertical.menu > .item,
+.flex-container-nav .ui.vertical.menu .menu > .item {
+  margin: 2px 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--color-text-light-2);
+  font-size: 0.875rem;
+}
+
+.flex-container-nav .ui.vertical.menu > .item.active,
+.flex-container-nav .ui.vertical.menu .menu > .item.active {
+  background: var(--color-primary-alpha-10);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+@media (max-width: 767.98px) {
+  #navbar { padding-inline: 8px; }
+  #navbar .navbar-left,
+  #navbar .navbar-right { min-height: 48px; }
+  overflow-menu .overflow-menu-items { overflow-x: auto; overscroll-behavior-inline: contain; }
+  overflow-menu.ui.menu .item,
+  overflow-menu.ui.menu a.item { padding-inline: 10px !important; }
 }
 
 /* ---------- Footer ----------
