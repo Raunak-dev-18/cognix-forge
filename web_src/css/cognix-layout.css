@@ -459,3 +459,113 @@ signed-in dashboard. Imported by the Cognix themes after cognix-pages.css.
   .cx-dash__side { position: static; order: 2; }
   .cx-dash__main { order: 1; }
 }
+
+/* ===================================================================
+   Account activation (uses the auth split card)
+   =================================================================== */
+
+.page-content.cx-auth form.ui.form.cx-activate {
+  display: flex;
+  flex-direction: column;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.cx-activate__icon {
+  color: var(--color-primary);
+}
+
+.cx-activate__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cx-activate__msg {
+  margin: 0;
+  color: var(--color-text-light-1);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  text-align: center;
+  text-wrap: pretty;
+}
+
+.cx-activate__msg b {
+  display: inline-block;
+  padding: 0 8px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 6px;
+  background: var(--color-body);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.cx-activate__hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--color-light-border);
+  border-radius: 10px;
+  color: var(--color-text-light-2);
+  font-size: 0.8rem;
+}
+
+.cx-activate__change {
+  padding: 12px 14px;
+  border: 1px solid var(--color-light-border);
+  border-radius: 10px;
+  background: var(--color-body);
+}
+
+.cx-activate__change > summary {
+  color: var(--color-text-light-1);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.cx-activate__change[open] > summary {
+  margin-bottom: 10px;
+}
+
+.cx-activate__change > p {
+  margin: 0 0 10px;
+  color: var(--color-text-light-2);
+  font-size: 0.8rem;
+}
+
+.cx-activate__foot {
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid var(--color-light-border);
+}
+
+.cx-activate__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-light-1);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.cx-activate__link:hover {
+  color: var(--color-text);
+}
+
+.cx-auth--activate .cx-auth__panel {
+  justify-content: center;
+  gap: 4px;
+}
+
+.cx-auth--activate .cx-activate__foot {
+  margin-top: 24px;
+}
